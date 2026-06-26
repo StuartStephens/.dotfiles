@@ -1,4 +1,5 @@
 ---
+model: "github-copilot/gpt-5.3-codex"
 description: >-
   Use this agent when the user needs precise, delegated implementation work
   completed without architectural changes. This agent executes specific coding
@@ -66,7 +67,7 @@ description: >-
   </commentary>
 
   </example>
-mode: all
+mode: subagent
 tools:
   task: false
 ---
