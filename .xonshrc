@@ -1,0 +1,16 @@
+# XONSH WEBCONFIG START
+$XONSH_COLOR_STYLE = 'lightbulb'
+$PROMPT = '{env_name}{BOLD_GREEN}{user}@{hostname}{BOLD_BLUE} {cwd}{branch_color}{gitstatus: {}}{RESET} {BOLD_BLUE}{prompt_end}{RESET} '
+# XONSH WEBCONFIG END
+if $XONSH_INTERACTIVE:
+    fastfetch
+
+# Unreal Engine
+$UE_ROOT = "/home/stuart/Apps/Unreal"
+$SDL_VIDEODRIVER = "x11"
+
+aliases["ue"] = [
+    "env",
+    "SDL_VIDEODRIVER=x11",
+    "/home/stuart/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor",
+]

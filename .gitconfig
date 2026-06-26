@@ -1,0 +1,5 @@
+[user]
+	name = Stuart
+	email = contact@stuartstephens.com
+[include]
+	path = ~/.gitconfig.local

@@ -1,0 +1,20 @@
+# Machine-specific Git overrides.
+#
+# Copy this file to ~/.gitconfig.local and edit values as needed.
+# This file is intentionally not loaded directly by Git.
+
+[core]
+	editor = nvim
+
+[pull]
+	rebase = false
+
+# Example signing setup:
+#[commit]
+#	gpgsign = true
+#
+#[gpg]
+#	format = ssh
+#
+#[user]
+#	signingkey = /home/stuart/.ssh/id_ed25519.pub

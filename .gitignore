@@ -1,0 +1,9 @@
+.config/opencode/.env
+.config/opencode/node_modules/
+.config/nvim/.git/
+.config/nvim/.DS_Store
+.config/nvim/tags
+.config/nvim/spell/
+.config/nvim/nvim
+.gitconfig.local
+.DS_Store

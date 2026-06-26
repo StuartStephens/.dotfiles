@@ -1,0 +1,123 @@
+*neorg-quickstart.txt*   Quick reference for your Neorg workflow
+
+==============================================================================
+Neorg + Hugo workflow
+
+This setup gives you two default workspaces:
+
+- notes -> ~/Neorg
+- hugo  -> ~/projects/my-hugo-site/content-norg
+
+You can override those via environment variables before launching Neovim:
+
+- NEORG_HOME
+- NEORG_HUGO_WORKSPACE
+
+Example:
+>
+  NEORG_HOME=~/notes NEORG_HUGO_WORKSPACE=~/src/site/content-norg nvim
+<
+
+==============================================================================
+Keymaps
+
+- <leader>ni  open current workspace index
+- <leader>nn  create a new note in current workspace
+- <leader>nw  switch to notes workspace
+- <leader>nh  switch to Hugo workspace
+- <leader>nt  cycle todo state on current list item
+- <leader>ne  export current .norg file to markdown (.md)
+- <leader>nr  return to previous non-Neorg context
+
+==============================================================================
+Core commands
+
+- :Neorg index
+- :Neorg workspace
+- :Neorg workspace notes
+- :Neorg workspace hugo
+- :Neorg return
+
+Custom helper commands in this config:
+
+- :NeorgWorkspaceAdd <name> <path>
+  Adds a workspace and opens it immediately.
+
+- :NeorgExportToMarkdown [output_path]
+  Exports the current file with markdown exporter.
+  If output_path is omitted, exports next to the current file as .md.
+
+==============================================================================
+Todo syntax
+
+Neorg todo states are list modifiers:
+
+- ( ) undone
+- (x) done
+- (-) pending
+- (=) on_hold
+- (_) cancelled
+- (!) important
+- (+) recurring
+- (?) ambiguous
+
+Put cursor on a todo and press <leader>nt (or <C-Space> in norg buffers) to cycle.
+
+==============================================================================
+Lesson plan template
+
+Create a file in your hugo workspace, e.g.:
+
+- ~/projects/my-hugo-site/content-norg/lessons/week-01-math.norg
+
+Starter structure:
+>
+  @document.meta
+  title: Week 1 - Fractions
+  description: Intro lesson plan
+  authors: [Your Name]
+  categories: [lesson-plan, math]
+  created: 2026-05-30
+  updated: 2026-05-30
+  @end
+
+  * Objectives
+  - ( ) Understand numerator and denominator
+  - ( ) Complete guided examples
+
+  * Materials
+  - Whiteboard
+  - Worksheet A
+
+  * Timeline
+  - 10m warm-up
+  - 20m direct instruction
+  - 20m group activity
+  - 10m exit ticket
+
+  * Notes
+  - Keep examples visual.
+<
+
+Export it when ready:
+>
+  :NeorgExportToMarkdown
+<
+
+==============================================================================
+Hugo integration idea
+
+Recommended flow:
+
+1. Write in .norg under content-norg
+2. Export to markdown into your Hugo content tree
+3. Run hugo server
+
+If you want automation, add a script in your Hugo repo that calls Neovim headless
+to export selected files.
+
+==============================================================================
+Notes
+
+- Neorg depends on external libraries (installed by lazy.nvim in this setup).
+- If Neorg commands do not appear, run :Lazy and check plugin/dependency status.

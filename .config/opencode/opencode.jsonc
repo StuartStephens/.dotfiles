@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "product-manager",
+  "mcp": {
+    "gh_personal": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PERSONAL_PAT}"
+      }
+    }
+  }
+}
