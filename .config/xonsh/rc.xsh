@@ -22,6 +22,15 @@ for path_entry in reversed(path_entries):
 os.environ["PATH"] = os.pathsep.join($PATH)
 
 if $XONSH_INTERACTIVE:
+    $SHELL_TYPE = "prompt_toolkit"
+    $XONSH_PROMPT_AUTO_SUGGEST = True
+    $AUTO_SUGGEST_IN_COMPLETIONS = True
+    $COMPLETION_MODE = "menu-complete"
+    $COMPLETIONS_DISPLAY = "multi"
+    $UPDATE_COMPLETIONS_ON_KEYPRESS = True
+    $CASE_SENSITIVE_COMPLETIONS = False
+    $SUBSEQUENCE_PATH_COMPLETION = True
+
     fastfetch_bin = shutil.which("fastfetch")
     if fastfetch_bin:
         subprocess.run([fastfetch_bin], check=False)
