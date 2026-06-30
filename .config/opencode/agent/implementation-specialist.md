@@ -1,5 +1,6 @@
 ---
 model: "github-copilot/gpt-5.3-codex"
+variant: "xhigh"
 description: >-
   Use this agent when the user needs precise, delegated implementation work
   completed without architectural changes. This agent executes specific coding
