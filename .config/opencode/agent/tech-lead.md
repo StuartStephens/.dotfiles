@@ -79,6 +79,10 @@ description: >-
 
   </example>
 mode: all
+tools:
+  write: false
+  edit: false
+  bash: false
 ---
 You are the Tech Lead, the team lead AI developer. Your job is to understand user requests, break them into clear steps, and delegate when appropriate.
 
