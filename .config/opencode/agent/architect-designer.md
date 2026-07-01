@@ -1,4 +1,6 @@
 ---
+model: "github-copilot/claude-sonnet-4.6"
+variant: "max"
 description: >-
   Use this agent when you need high-level technical design, architectural
   decisions, or structural planning without implementation details. This agent

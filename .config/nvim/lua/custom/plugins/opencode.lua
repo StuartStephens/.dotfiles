@@ -32,7 +32,11 @@ do
     end
 
     local opencode_port = pick_open_port()
-    local opencode_cmd = string.format('NODE_TLS_REJECT_UNAUTHORIZED=0 opencode --port %d', opencode_port)
+    local opencode_cmd = string.format('opencode --port %d', opencode_port)
+    local horizontal_terminal_opts = {
+      split = 'below',
+      height = math.max(12, math.floor(vim.o.lines * 0.35)),
+    }
 
     local function run_opencode_terminal_action(action, label)
       local ok, err = pcall(action)
@@ -54,6 +58,12 @@ do
       vim.notify(string.format('%s failed: %s', label, message), vim.log.levels.ERROR, { title = 'opencode.nvim' })
     end
 
+    local function toggle_opencode_terminal(opts, label)
+      run_opencode_terminal_action(function()
+        require('opencode.terminal').toggle(opencode_cmd, opts)
+      end, label)
+    end
+
     vim.g.opencode_opts = {
       server = {
         port = opencode_port,
@@ -68,9 +78,7 @@ do
           end, 'OpenCode terminal stop')
         end,
         toggle = function()
-          run_opencode_terminal_action(function()
-            require('opencode.terminal').toggle(opencode_cmd)
-          end, 'OpenCode terminal toggle')
+          toggle_opencode_terminal(nil, 'OpenCode terminal toggle')
         end,
       },
     }
@@ -119,7 +127,11 @@ do
 
     vim.keymap.set('n', '<leader>ot', function()
       require('opencode').toggle()
-    end, { desc = 'Toggle embedded' })
+    end, { desc = 'Toggle embedded vertical' })
+
+    vim.keymap.set('n', '<leader>oT', function()
+      toggle_opencode_terminal(horizontal_terminal_opts, 'OpenCode terminal horizontal toggle')
+    end, { desc = 'Toggle embedded horizontal' })
 
     vim.keymap.set('n', '<leader>oc', function()
       require('opencode').command()

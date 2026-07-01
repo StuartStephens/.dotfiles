@@ -1,4 +1,6 @@
 ---
+model: "github-copilot/claude-sonnet-4.6"
+variant: "max"
 description: Review code and diffs with terse, actionable findings using caveman-review style.
 mode: all
 temperature: 0.1

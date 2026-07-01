@@ -1,4 +1,6 @@
 ---
+model: "github-copilot/gpt-5.3-codex"
+variant: "xhigh"
 description: >-
   Use this agent when you need comprehensive test coverage for code changes,
   including writing unit and integration tests, executing test suites,

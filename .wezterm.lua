@@ -34,7 +34,9 @@ wezterm.on("format-tab-title", function(tab, _, _, _, _, max_width)
     title = "shell"
   end
 
-  title = wezterm.truncate_right(title, math.max(1, max_width - 2))
+  local title_width = math.max(1, max_width - 2)
+  title = wezterm.truncate_right(title, title_width)
+  title = wezterm.pad_right(title, title_width)
   return { { Text = " " .. title .. " " } }
 end)
 
@@ -46,7 +48,7 @@ return {
   },
   font_size = 12.5,
   line_height = 1.05,
-  tab_max_width = 32,
+  tab_max_width = 128,
 
   leader = { key = "b", mods = "CTRL", timeout_milliseconds = 1000 },
 

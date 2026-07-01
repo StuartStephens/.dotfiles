@@ -14,7 +14,8 @@ vim.opt.expandtab = true
 
 vim.opt.smartindent = true
 
-vim.opt.wrap = false
+vim.opt.wrap = true
+vim.opt.linebreak = true
 
 vim.opt.swapfile = false
 vim.opt.backup = false
@@ -35,34 +36,74 @@ vim.opt.updatetime = 50
 -- vim.opt.colorcolumn = '80'
 
 vim.opt.title = true
-vim.opt.titlestring = [[%{expand('%:t') == '' ? '[No Name]' : expand('%:t')}%{&modified ? ' [+]' : ''} - %{fnamemodify(getcwd(), ':t')}]]
-
-local function set_wezterm_tab_title()
-  if not os.getenv 'WEZTERM_PANE' or vim.fn.executable 'wezterm' ~= 1 then
-    return
+local function fugitive_branch()
+  if vim.fn.exists '*FugitiveHead' ~= 1 then
+    return ''
   end
 
-  local filename = vim.fn.expand '%:t'
-  if filename == '' then
-    filename = '[No Name]'
+  local ok, branch = pcall(vim.fn.FugitiveHead)
+  if not ok or type(branch) ~= 'string' then
+    return ''
   end
 
-  local modified = vim.bo.modified and ' [+]' or ''
+  return branch
+end
+
+local function current_title()
+  local bufname = vim.api.nvim_buf_get_name(0)
   local cwd = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
-  local title = filename .. modified
+  local title = ''
+
+  if bufname:match '^fugitive://' then
+    local branch = fugitive_branch()
+    local branch_prefix = branch ~= '' and ('[' .. branch .. '] ') or ''
+    local git_path = bufname:match '//[^/]+/(.+)$'
+
+    if vim.bo.filetype == 'fugitive' then
+      title = branch_prefix .. 'Git Status'
+    elseif vim.bo.filetype == 'git' then
+      title = branch_prefix .. 'Git Log'
+    elseif git_path and git_path ~= '' then
+      local filename = vim.fn.fnamemodify(git_path, ':t')
+      if filename == '' then
+        title = branch_prefix .. 'Git'
+      else
+        title = branch_prefix .. filename .. ' (git)'
+      end
+    else
+      title = branch_prefix .. 'Git'
+    end
+  else
+    local filename = vim.fn.expand '%:t'
+    if filename == '' then
+      filename = '[No Name]'
+    end
+
+    local modified = vim.bo.modified and ' [+]' or ''
+    title = filename .. modified
+  end
 
   if cwd ~= '' then
     title = title .. ' - ' .. cwd
   end
 
-  vim.system({ 'wezterm', 'cli', 'set-tab-title', title }, { text = true })
+  return title
+end
+
+local function update_titles()
+  local title = current_title()
+  vim.opt.titlestring = title:gsub('%%', '%%%%')
+
+  if os.getenv 'WEZTERM_PANE' and vim.fn.executable 'wezterm' == 1 then
+    vim.system({ 'wezterm', 'cli', 'set-tab-title', title }, { text = true })
+  end
 end
 
 local wezterm_title_group = vim.api.nvim_create_augroup('custom-wezterm-tab-title', { clear = true })
 
-vim.api.nvim_create_autocmd({ 'VimEnter', 'BufEnter', 'BufFilePost', 'BufModifiedSet', 'DirChanged' }, {
+vim.api.nvim_create_autocmd({ 'VimEnter', 'BufEnter', 'BufFilePost', 'BufModifiedSet', 'DirChanged', 'FileType' }, {
   group = wezterm_title_group,
-  callback = set_wezterm_tab_title,
+  callback = update_titles,
 })
 
 vim.api.nvim_create_autocmd('VimLeavePre', {
