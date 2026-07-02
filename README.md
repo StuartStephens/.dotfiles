@@ -10,6 +10,7 @@ Unified personal dotfiles for CachyOS.
 - `~/.config/opencode/opencode.jsonc`
 - `~/.config/opencode/package.json`
 - `~/.config/opencode/package-lock.json`
+- `~/.config/gh-dash/config.yml`
 - `~/.config/nvim/*` (copied from previous standalone repo)
 - `~/.gitconfig`
 
@@ -58,10 +59,10 @@ git clone https://github.com/<your-username>/dotfiles.git ~/dotfiles
 
 ### Symlink managed files
 
-> ⚠️ Back up existing configs before symlinking (for example: `~/.gitconfig`, `~/.wezterm.lua`, `~/.xonshrc`, `~/.config/xonsh/rc.xsh`, `~/.config/opencode/*`, and `~/.config/nvim`).
+> ⚠️ Back up existing configs before symlinking (for example: `~/.gitconfig`, `~/.wezterm.lua`, `~/.xonshrc`, `~/.config/xonsh/rc.xsh`, `~/.config/opencode/*`, `~/.config/gh-dash/config.yml`, and `~/.config/nvim`).
 
 ```sh
-mkdir -p ~/.config/xonsh ~/.config/opencode
+mkdir -p ~/.config/xonsh ~/.config/opencode ~/.config/gh-dash
 
 ln -s ~/dotfiles/.gitconfig ~/.gitconfig
 ln -s ~/dotfiles/.wezterm.lua ~/.wezterm.lua
@@ -72,6 +73,8 @@ ln -s ~/dotfiles/.config/xonsh/rc.xsh ~/.config/xonsh/rc.xsh
 ln -s ~/dotfiles/.config/opencode/opencode.jsonc ~/.config/opencode/opencode.jsonc
 ln -s ~/dotfiles/.config/opencode/package.json ~/.config/opencode/package.json
 ln -s ~/dotfiles/.config/opencode/package-lock.json ~/.config/opencode/package-lock.json
+
+ln -s ~/dotfiles/.config/gh-dash/config.yml ~/.config/gh-dash/config.yml
 
 ln -s ~/dotfiles/.config/nvim ~/.config/nvim
 ```
