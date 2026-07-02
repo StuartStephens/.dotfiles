@@ -1,5 +1,7 @@
 [user]
 	name = Stuart
 	email = contact@stuartstephens.com
+[push]
+	autoSetupRemote = true
 [include]
 	path = ~/.gitconfig.local
