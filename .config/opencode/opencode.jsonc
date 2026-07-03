@@ -19,5 +19,6 @@
         "Authorization": "Bearer {env:GITHUB_PERSONAL_PAT}"
       }
     }
-  }
+  },
+  "plugin": ["./plugins/title-status.js", "./plugins/keep-awake.js"]
 }
