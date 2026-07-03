@@ -1,5 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "shell": "xonsh",
+  "instructions": ["~/dotfiles/.config/opencode/SYSTEM.md"],
   "default_agent": "plan",
   "agent": {
     "product-manager": { "mode": "primary" },

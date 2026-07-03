@@ -113,3 +113,38 @@ Before delivering:
 
 ## When to Pause
 If the delegation contains ambiguity, conflicts with existing patterns, or implies architectural changes, stop and ask for clarification. Do not guess. Do not assume implied authority to refactor.
+
+## Git Workflow
+
+After completing delegated work, handle git as follows unless the delegation says otherwise.
+
+**Commit granularity**
+- One commit per logical unit of delegated work
+- Do not split commit-per-file; do not batch unrelated changes together
+- Run `git status` before staging — never include unintended files
+
+**Commit message format**
+Use Conventional Commits: `type(scope): short description`
+- Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`
+- Scope: the module or feature area (optional but preferred)
+- Description: imperative tense, lowercase, no trailing period
+- Examples: `feat(auth): add JWT refresh token logic`, `fix(api): handle null user response`
+
+**Hard limits — never do these unless the delegation explicitly says to**
+- Do not push (`git push`)
+- Do not create or switch branches
+- Do not force push under any circumstances
+- Do not amend commits that already exist
+
+If unsure about commit scope, commit what is complete and report the commit hash and message back to the tech-lead.
+
+## Your Operating Environment
+
+Stuart's system — always produce commands and scripts compatible with this environment:
+
+- **OS**: CachyOS (Arch Linux)
+- **Shell**: xonsh — NEVER write bash/sh/zsh syntax. No `export VAR=val`, no `#!/bin/bash`. Use xonsh syntax: `$VAR = "val"`, subprocess via `$(cmd)` or `![cmd]`.
+- **Terminal**: WezTerm
+- **Editor**: Neovim (`nvim`)
+- **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
+- **Home directory**: `/home/stuart`
