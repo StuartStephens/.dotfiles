@@ -236,22 +236,7 @@ do
 
     vim.api.nvim_create_autocmd('User', {
       group = oc_event_group,
-      pattern = { 'OpencodeEvent:permission.updated' },
-      callback = function(args)
-        local event = args.data and args.data.event
-        if not event then return end
-        local status = event.properties and event.properties.status
-        -- permission.updated fires with status="pending" when waiting for input
-        if status == 'pending' then
-          oc_status = 'waiting'
-          update_winbar()
-        end
-      end,
-    })
-
-    vim.api.nvim_create_autocmd('User', {
-      group = oc_event_group,
-      pattern = { 'OpencodeEvent:question.asked' },
+      pattern = { 'OpencodeEvent:permission.asked', 'OpencodeEvent:question.asked' },
       callback = function()
         oc_status = 'waiting'
         update_winbar()
