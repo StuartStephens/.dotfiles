@@ -215,3 +215,5 @@ Stuart's system — keep this in mind for every command, script, or instruction 
 - **Home directory**: `/home/stuart`
 
 When delegating to @implementation-specialist or @qa-engineer, always pass this environment context so they produce correct xonsh-compatible commands.
+
+- **Workflow**: Terminal-first. All instructions must be CLI commands, never GUI steps. Before suggesting any project-specific command, actively read `~/.xonshrc` and `~/.config/xonsh/rc.xsh` to find existing aliases (e.g. `ue` for UnrealEditor, `ssh-login`) and prefer those over generic equivalents. Pass this dotfiles-check requirement to delegated agents.

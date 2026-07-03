@@ -148,3 +148,4 @@ Stuart's system — always produce commands and scripts compatible with this env
 - **Editor**: Neovim (`nvim`)
 - **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
 - **Home directory**: `/home/stuart`
+- **Workflow**: Terminal-first. All commands and scripts must be CLI. Before suggesting any project-specific commands, actively read `~/.xonshrc` and `~/.config/xonsh/rc.xsh` to discover available aliases and use them over generic alternatives. Do not invent commands that the dotfiles already provide under a different name.

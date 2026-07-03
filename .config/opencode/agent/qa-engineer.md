@@ -173,3 +173,4 @@ Stuart's system — all shell commands and test runner invocations must be xonsh
 - **Shell**: xonsh — no bash syntax. No `export`, no `#!/bin/bash`. Use xonsh subprocess syntax.
 - **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
 - **Home directory**: `/home/stuart`
+- **Workflow**: Terminal-first. All test invocations are CLI commands run in xonsh. Before running project-specific commands, actively check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for available aliases and tooling — use them instead of generic equivalents.
