@@ -251,7 +251,16 @@ do
 
     vim.api.nvim_create_autocmd('User', {
       group = oc_event_group,
-      pattern = { 'OpencodeEvent:permission.replied' },
+      pattern = { 'OpencodeEvent:question.asked' },
+      callback = function()
+        oc_status = 'waiting'
+        update_winbar()
+      end,
+    })
+
+    vim.api.nvim_create_autocmd('User', {
+      group = oc_event_group,
+      pattern = { 'OpencodeEvent:permission.replied', 'OpencodeEvent:question.replied', 'OpencodeEvent:question.rejected' },
       callback = function()
         -- Revert waiting state; the next session.status will set the real state
         if oc_status == 'waiting' then

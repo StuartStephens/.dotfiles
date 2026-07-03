@@ -49,9 +49,9 @@ export const TitleStatus = async ({ $, directory }) => {
           lastSessionStatus = 'error'
           await setTitle('[oc:error]')
         }
-      } else if (type === 'permission.asked') {
+      } else if (type === 'permission.asked' || type === 'question.asked') {
         await setTitle('[oc:waiting]')
-      } else if (type === 'permission.replied') {
+      } else if (type === 'permission.replied' || type === 'question.replied' || type === 'question.rejected') {
         await setTitle('[oc:' + lastSessionStatus + ']')
       }
     },
