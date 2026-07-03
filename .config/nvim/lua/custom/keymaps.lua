@@ -78,3 +78,12 @@ end, { desc = '[T]oggle [D]iagnostics' })
 
 -- Restart LSP
 keymap('n', '<leader>lr', ':LspRestart<CR>', { desc = '[L]SP [R]estart' })
+
+-- SSH agent — load key into the systemd user agent from inside nvim.
+-- The socket path is always /run/user/<uid>/ssh-agent.socket (matches rc.xsh).
+vim.api.nvim_create_user_command('SshLogin', function()
+  local uid = vim.trim(vim.fn.system 'id -u')
+  vim.env.SSH_AUTH_SOCK = '/run/user/' .. uid .. '/ssh-agent.socket'
+  local out = vim.trim(vim.fn.system 'ssh-add -t 8h ~/.ssh/id_ed25519 2>&1')
+  vim.notify(out, vim.log.levels.INFO)
+end, { desc = 'Load SSH key into agent' })
