@@ -156,7 +156,12 @@ Use Conventional Commits: `type(scope): short description`
      ```xonsh
      cd /path/to/worktree
      ```
-   - **App launch command**: command to run the project for manual testing, as a ready-to-run command (e.g. `ue /path/to/worktree/Vantage.uproject`)
+   - **Testing instructions**: a numbered checklist Stuart can follow immediately. Always lead with the commands, then describe exactly what to navigate to and verify for this specific change:
+     1. `cd /path/to/worktree`
+     2. `ue /path/to/worktree/Vantage.uproject` (or the correct launch command for this project)
+     3. [what to open / navigate to inside the running app]
+     4. [what to check — specific expected behaviour introduced by this change]
+     Keep it concise and specific to what was just implemented. No generic smoke-test boilerplate.
 
 If unsure about commit scope, commit what is complete and deliver the full post-commit report.
 

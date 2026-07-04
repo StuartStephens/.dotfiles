@@ -246,5 +246,6 @@ This is the primary development model. Every unit of work lives in its own git w
 - Draft PR URL
 - `cd <worktree-path>` — to open in a new terminal tab
 - App launch command — to start the build/app for testing
+- Testing instructions — step-by-step verification specific to the change, opening with the `cd` and launch commands
 
 **Never start implementation on master.** If an implementation agent reports it has no worktree path, stop it, create the worktree, and re-delegate with the correct path.
