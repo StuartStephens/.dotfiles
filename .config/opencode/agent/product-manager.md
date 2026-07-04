@@ -144,5 +144,7 @@ When two phases touch the same file, explicitly call out which branch must merge
 For each phase, output:
 - Branch name (e.g. `feature/siege-victory-condition`)
 - Worktree directory (e.g. `Vantage-feature-siege-victory-condition`)
+- Session open command — the first line to copy into a new terminal tab:
+  `cd /home/stuart/Projects/Unreal/Vantage-<branch-slug>`
 - Files touched (key ones — not exhaustive)
 - Any merge dependency

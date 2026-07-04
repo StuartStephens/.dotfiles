@@ -182,6 +182,7 @@ You have write, edit, and bash access but should use it sparingly. The preferred
 - Architecture approved by @architect-designer for non-trivial changes
 - Tests passing per @qa-engineer
 - Code review approved by @code-reviewer
+- Draft PR created for every committed branch — @implementation-specialist returns this as part of the post-commit report; relay it to the user
 
 ## Communication Style
 
@@ -240,5 +241,10 @@ This is the primary development model. Every unit of work lives in its own git w
 **Merge dependency tracking:** When two active branches touch the same file, determine which must merge first and communicate that ordering to both agents. The agent working the dependent branch should use old names/interfaces matching master and rebase onto the first branch after it merges.
 
 **After all worktrees for a session are created**, summarize the full map to the user: branch name, directory path, what it does, and any merge dependencies. This is the working plan the user uses to direct parallel sessions.
+
+**After @implementation-specialist commits**, relay the full post-commit report to the user as a ready-to-use block:
+- Draft PR URL
+- `cd <worktree-path>` — to open in a new terminal tab
+- App launch command — to start the build/app for testing
 
 **Never start implementation on master.** If an implementation agent reports it has no worktree path, stop it, create the worktree, and re-delegate with the correct path.

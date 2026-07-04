@@ -130,13 +130,35 @@ Use Conventional Commits: `type(scope): short description`
 - Description: imperative tense, lowercase, no trailing period
 - Examples: `feat(auth): add JWT refresh token logic`, `fix(api): handle null user response`
 
-**Hard limits — never do these unless the delegation explicitly says to**
-- Do not push (`git push`)
-- Do not create or switch branches
-- Do not force push under any circumstances
-- Do not amend commits that already exist
+**Hard limits — never do these**
+- Never push to `master` or `main` under any circumstances
+- Never force push under any circumstances
+- Never create or switch branches
+- Never amend commits that already exist
 
-If unsure about commit scope, commit what is complete and report the commit hash and message back to the tech-lead.
+**Post-commit checklist — run after every commit**
+
+1. **Push the branch**
+   ```xonsh
+   git push -u origin HEAD
+   ```
+
+2. **Ensure a draft PR exists** — check first, create only if missing:
+   ```xonsh
+   gh pr view --json url,isDraft 2>/dev/null || gh pr create --draft --title "<commit subject line>" --body "" --base master
+   ```
+   If a draft PR already exists, do not create another one. Use `main` instead of `master` if that is the repo's default branch.
+
+3. **Report back to the tech-lead** with all of the following — every field is required:
+   - **Commit**: hash + full commit message
+   - **Draft PR**: URL
+   - **Worktree path**: absolute path to `cd` to in a new terminal tab, as a ready-to-run command:
+     ```xonsh
+     cd /path/to/worktree
+     ```
+   - **App launch command**: command to run the project for manual testing, as a ready-to-run command (e.g. `ue /path/to/worktree/Vantage.uproject`)
+
+If unsure about commit scope, commit what is complete and deliver the full post-commit report.
 
 ## Your Operating Environment
 
