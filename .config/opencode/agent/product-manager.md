@@ -114,3 +114,35 @@ Stuart's workflow is terminal-first. When writing acceptance criteria or describ
 - Frame all steps as CLI operations, never GUI steps
 - If a requirement involves launching project tooling (build systems, editors, launchers), check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for documented aliases and reference them by name in the requirements (e.g. `ue` for UnrealEditor rather than the full binary path)
 - All shell syntax in requirements must be valid xonsh, not bash
+
+## Parallel Delivery & Branch Mapping
+
+Work in this project is parallelized across git worktrees. Your requirements output directly determines how many worktrees get created and how work gets split. Follow these rules when producing Implementation Phases.
+
+### One phase = one branch
+
+Every phase in your "Suggested Implementation Phases" section must map to exactly one git branch. Name it explicitly using project conventions:
+
+| Change type | Prefix | Example |
+|---|---|---|
+| New functionality | `feature/` | `feature/war-gong` |
+| Bug fix | `fix/` | `fix/tower-plot-spawn-height` |
+| Rename / restructure (no behavior change) | `refactor/` | `refactor/arena-to-siege-rename` |
+| Build, config, tooling | `chore/` | `chore/update-default-engine-ini` |
+
+### Branch sizing rule
+
+If a phase touches more than ~5 files OR contains two independent concerns, split it into two branches. Err toward smaller branches. A one-file fix and a five-file feature are not the same branch even if they are related.
+
+### Merge dependency rule
+
+When two phases touch the same file, explicitly call out which branch must merge first. Format it as:
+> ⚠️ `feature/branch-b` depends on `refactor/branch-a` — `branch-a` must merge first. The `branch-b` agent should use pre-rename names and rebase after `branch-a` merges.
+
+### What to include in "Suggested Implementation Phases"
+
+For each phase, output:
+- Branch name (e.g. `feature/siege-victory-condition`)
+- Worktree directory (e.g. `Vantage-feature-siege-victory-condition`)
+- Files touched (key ones — not exhaustive)
+- Any merge dependency
