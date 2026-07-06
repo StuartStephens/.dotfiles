@@ -226,17 +226,35 @@ When delegating to @implementation-specialist or @qa-engineer, always pass this 
 
 This is the primary development model. Every unit of work lives in its own git worktree. Multiple worktrees run simultaneously — each one is a fully independent Unreal checkout with its own `Binaries/`, `Intermediate/`, and `DerivedDataCache/`. Stuart works across multiple terminal sessions, one per worktree, with agents running in parallel.
 
+Worktrees are managed with `wt` ([worktrunk CLI](https://worktrunk.dev)).
+
+### Bare-base-dir layout
+
+Every project uses a bare git repo as its worktree container. The bare repo IS the project directory; all branch worktrees live as subdirectories inside it:
+
+```
+~/Projects/Unreal/Vantage/                    ← bare repo (project base dir)
+~/Projects/Unreal/Vantage/master              ← default branch worktree
+~/Projects/Unreal/Vantage/feature-war-gong    ← feature worktree
+~/Projects/Unreal/Vantage/fix-spawn-height    ← fix worktree
+```
+
+Branch names with slashes are sanitized to hyphens by `wt`: `feature/war-gong` → `feature-war-gong`.
+
+**Prerequisite**: A `wt.toml` must exist in the project's bare root for `wt switch --create` to work correctly. If the project has not been migrated to this layout, stop and ask Stuart to migrate it before creating any worktrees.
+
 ### Your responsibilities as orchestrator
 
 **Before spawning any implementation agent:**
 1. Decide the branch name using project conventions (`feature/`, `fix/`, `refactor/`, `chore/`). One concern per branch — never mix a feature and a fix.
-2. Check whether the worktree already exists. If not, create it:
+2. Check whether the worktree already exists. If not, create it with `wt` (run from inside any existing worktree of that project):
    ```xonsh
-   cd /home/stuart/Projects/Unreal/Vantage
+   cd /home/stuart/Projects/Unreal/Vantage/master
    git fetch origin
-   git worktree add /home/stuart/Projects/Unreal/Vantage-<branch-slug> -b <branch-name> origin/master
+   wt switch --create --no-cd <branch-name>
    ```
-   Branch slashes become hyphens in the directory name: `feature/war-gong` → `Vantage-feature-war-gong`.
+   The resulting worktree path is always `<bare-base-dir>/<branch | sanitize>`:
+   `feature/war-gong` → `/home/stuart/Projects/Unreal/Vantage/feature-war-gong`
 3. Pass the full worktree directory path to the implementation agent as part of the delegation. The agent must work exclusively inside that directory.
 
 **Branch sizing rule:** If a task touches more than ~5 files or contains two independent concerns, split it into two branches. Small, focused branches are easier to review, faster to merge, and simpler to rebase when conflicts arise.
@@ -251,4 +269,4 @@ This is the primary development model. Every unit of work lives in its own git w
 - App launch command — to start the build/app for testing
 - Testing instructions — step-by-step verification specific to the change, opening with the `cd` and launch commands
 
-**Never start implementation on master.** If an implementation agent reports it has no worktree path, stop it, create the worktree, and re-delegate with the correct path.
+**Never start implementation on the default branch or directly in the bare repo root.** If an implementation agent reports it has no worktree path, stop it, create the worktree, and re-delegate with the correct path.

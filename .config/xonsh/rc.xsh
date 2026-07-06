@@ -51,3 +51,29 @@ def _ssh_login(args, stdin=None):
     ssh-add -l
 
 aliases['ssh-login'] = _ssh_login
+
+# worktrunk (wt) shell integration — enables wt switch to cd in xonsh.
+# wt uses temp-file directives to signal directory changes; this wrapper
+# sets the required env vars, runs the real binary, then performs the cd.
+def _wt_xonsh(args, stdin=None):
+    import tempfile
+    cd_file = tempfile.mktemp(prefix='wt_cd_')
+    exec_file = tempfile.mktemp(prefix='wt_exec_')
+    $WORKTRUNK_DIRECTIVE_CD_FILE = cd_file
+    $WORKTRUNK_DIRECTIVE_EXEC_FILE = exec_file
+    try:
+        ![/usr/bin/wt @(args)]
+    finally:
+        target = None
+        if os.path.exists(cd_file):
+            with open(cd_file) as _f:
+                target = _f.read().strip() or None
+            os.unlink(cd_file)
+        if os.path.exists(exec_file):
+            os.unlink(exec_file)
+        ${...}.pop('WORKTRUNK_DIRECTIVE_CD_FILE', None)
+        ${...}.pop('WORKTRUNK_DIRECTIVE_EXEC_FILE', None)
+    if target:
+        os.chdir(target)
+
+aliases['wt'] = _wt_xonsh

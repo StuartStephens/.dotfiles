@@ -1,0 +1,8 @@
+# Worktree path template — bare-base-dir layout.
+# Worktrees are placed as subdirectories of the bare repo.
+# Branch slashes become hyphens: feature/foo → feature-foo
+worktree-path = "{{ repo_path }}/{{ branch | sanitize }}"
+
+# LLM commit message generation via opencode
+[commit.generation]
+command = "opencode run -m anthropic/claude-haiku-4.5 --variant fast"
