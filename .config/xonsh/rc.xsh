@@ -44,7 +44,6 @@ if $XONSH_INTERACTIVE:
     $AUTO_SUGGEST_IN_COMPLETIONS = True
     $COMPLETION_MODE = "menu-complete"
     $COMPLETIONS_DISPLAY = "multi"
-    $UPDATE_COMPLETIONS_ON_KEYPRESS = True
     $CASE_SENSITIVE_COMPLETIONS = False
     $SUBSEQUENCE_PATH_COMPLETION = True
 
@@ -55,9 +54,13 @@ if $XONSH_INTERACTIVE:
 $UE_ROOT = os.path.join(home_dir, "Apps", "Unreal")
 $SDL_VIDEODRIVER = "x11"
 
+# Always point at the systemd user ssh-agent socket so every shell (and
+# any process launched from it, e.g. nvim) can reach the agent without
+# needing to run ssh-login first.
+$SSH_AUTH_SOCK = f"/run/user/{os.getuid()}/ssh-agent.socket"
+
 def _ssh_login(args, stdin=None):
     """Load SSH key into agent with 8-hour timeout."""
-    $SSH_AUTH_SOCK = f"/run/user/{os.getuid()}/ssh-agent.socket"
     ssh-add -t 8h ~/.ssh/id_ed25519
     ssh-add -l
 

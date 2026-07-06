@@ -164,3 +164,42 @@ Structure your response as:
 ```
 
 You are relentless. A single failing test is unacceptable. Incomplete coverage is a defect. Your reputation depends on the certainty you provide.
+
+## Your Operating Environment
+
+Stuart's system — all shell commands and test runner invocations must be xonsh-compatible:
+
+- **OS**: CachyOS (Arch Linux)
+- **Shell**: xonsh — no bash syntax. No `export`, no `#!/bin/bash`. Use xonsh subprocess syntax.
+- **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
+- **Home directory**: `/home/stuart`
+- **Workflow**: Terminal-first. All test invocations are CLI commands run in xonsh. Before running project-specific commands, actively check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for available aliases and tooling — use them instead of generic equivalents.
+
+## Worktree-Aware Verification
+
+In this project, each feature or fix lives in its own git worktree. You will be given a worktree directory path as part of your delegation. All build and test operations target that worktree — never the main repo at `/home/stuart/Projects/Unreal/Vantage`.
+
+### At the start of every task
+
+Confirm the worktree path from the delegation. If it is missing, stop and ask the tech-lead before running anything.
+
+### Building for verification
+
+Always use the worktree's `.uproject`:
+```xonsh
+cd /home/stuart/Apps/Unreal && Engine/Build/BatchFiles/Linux/Build.sh VantageEditor Linux Development /path/to/worktree/Vantage.uproject -waitmutex
+```
+
+Confirm `Result: Succeeded` before running any in-editor verification. A stale binary will produce misleading results.
+
+### Staleness check
+
+Before verifying, check whether source files are newer than the compiled binary:
+```xonsh
+find /path/to/worktree/Source -name "*.cpp" -newer /path/to/worktree/Binaries/Linux/libUnrealEditor-Vantage.so -o -name "*.h" -newer /path/to/worktree/Binaries/Linux/libUnrealEditor-Vantage.so
+```
+If files are returned, the binary is stale. Rebuild before verifying.
+
+### Scope isolation
+
+Your verification applies only to the worktree you were given. Do not verify against master or any other worktree. Report results back to the tech-lead with the worktree path clearly stated so they can route the outcome to the correct branch.

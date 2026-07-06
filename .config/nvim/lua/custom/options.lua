@@ -73,6 +73,28 @@ local function current_title()
     else
       title = branch_prefix .. 'Git'
     end
+  elseif bufname:match '^oil://' then
+    local path = bufname:gsub('^oil://', '')
+    local remote_scheme = path:match '^%a[%a%d+%-%.]*://'
+    if remote_scheme then
+      local host = path:match '^%a[%a%d+%-%.]*://([^/]+)'
+      local dir = path:gsub('^%a[%a%d+%-%.]*://[^/]+', ''):gsub('/$', '')
+      local leaf = dir == '' and '/' or vim.fn.fnamemodify(dir, ':t')
+      if leaf == '' then
+        leaf = '/'
+      end
+      title = (host or 'remote') .. ':' .. leaf
+    else
+      path = path:gsub('/$', '')
+      if path == '' or path == '/' then
+        title = '/'
+      elseif path == (os.getenv 'HOME' or '') then
+        title = '~'
+      else
+        local leaf = vim.fn.fnamemodify(path, ':t')
+        title = leaf ~= '' and leaf or path
+      end
+    end
   else
     local filename = vim.fn.expand '%:t'
     if filename == '' then

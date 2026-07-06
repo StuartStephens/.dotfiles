@@ -12,3 +12,6 @@ aliases["ue"] = [
     "SDL_VIDEODRIVER=x11",
     "/home/stuart/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor",
 ]
+
+# netlify
+$NETLIFY_PERSONAL_ACCESS_TOKEN= "nfp_kymbF9QRQHst15cc4bGNgmwWMxAB7zQy8711"
