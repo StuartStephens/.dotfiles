@@ -183,7 +183,7 @@ Every task you receive should include a worktree directory path. This is the onl
 
 ### At the start of every task
 
-1. **Confirm your working directory.** The delegation must specify a worktree path such as `/home/stuart/Projects/Unreal/Vantage-feature-war-gong`. If it does not, stop and ask the tech-lead for the worktree path before touching any files.
+1. **Confirm your working directory.** The delegation must specify a worktree path such as `/home/stuart/Projects/Unreal/Vantage/feature-war-gong`. If it does not, stop and ask the tech-lead for the worktree path before touching any files.
 2. **Run the staleness check** before writing any code:
    ```xonsh
    find /path/to/worktree/Source -name "*.cpp" -newer /path/to/worktree/Binaries/Linux/libUnrealEditor-Vantage.so -o -name "*.h" -newer /path/to/worktree/Binaries/Linux/libUnrealEditor-Vantage.so
