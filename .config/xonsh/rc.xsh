@@ -8,8 +8,22 @@ if '/home/stuart/.local/bin' not in $PATH:
 home_dir = os.path.expanduser("~")
 local_bin = os.path.join(home_dir, ".local", "bin")
 opencode_bin = os.path.join(home_dir, ".opencode", "bin")
+android_sdk_root = "/opt/homebrew/share/android-commandlinetools"
+android_emulator_bin = os.path.join(android_sdk_root, "emulator")
+android_platform_tools = os.path.join(android_sdk_root, "platform-tools")
+android_studio_jbr = "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+
+if os.path.isdir(android_sdk_root):
+    $ANDROID_SDK_ROOT = android_sdk_root
+    $ANDROID_HOME = android_sdk_root
+
+if os.path.isdir(android_studio_jbr):
+    $JAVA_HOME = android_studio_jbr
 
 path_entries = (
+    os.path.join(android_studio_jbr, "bin"),
+    android_platform_tools,
+    android_emulator_bin,
     opencode_bin,
     local_bin,
     "/opt/homebrew/bin",
