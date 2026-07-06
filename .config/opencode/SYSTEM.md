@@ -36,6 +36,27 @@ Before suggesting commands for any project, **actively read** the dotfiles to fi
 
 Prefer documented aliases over generic equivalents whenever they exist. Do not invent commands that the dotfiles already provide under a different name.
 
+## Worktree Workflow
+
+All development uses `wt` ([worktrunk CLI](https://worktrunk.dev)) for git worktree management.
+
+**Bare-base-dir layout**: every project has a bare git repo as its worktree container. The bare repo directory IS the project base. All branch worktrees are subdirectories inside it:
+
+```
+~/Projects/<Category>/<Repo>/           ← bare repo (project base dir)
+~/Projects/<Category>/<Repo>/master     ← default branch worktree
+~/Projects/<Category>/<Repo>/<branch>   ← feature/fix worktrees
+```
+
+Branch name slashes sanitize to hyphens: `feature/foo` → `feature-foo`.
+
+Core commands:
+- **Create a worktree**: `wt switch --create <branch-name>` (from any worktree of that project; use `--no-cd` in agent/script contexts)
+- **List worktrees**: `wt list`
+- **Remove a worktree**: `wt remove`
+
+xonsh shell integration for `wt` is configured in `~/.config/xonsh/rc.xsh`. In automated/agent contexts, always pass `--no-cd` and compute the path as `<bare-base-dir>/<branch | sanitize>`.
+
 ## When delegating
 
 If you are passing tasks or context to another agent, include a note that Stuart uses xonsh and CachyOS so they don't produce incompatible commands.
