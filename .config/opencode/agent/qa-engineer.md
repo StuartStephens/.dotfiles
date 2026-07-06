@@ -177,7 +177,7 @@ Stuart's system — all shell commands and test runner invocations must be xonsh
 
 ## Worktree-Aware Verification
 
-In this project, each feature or fix lives in its own git worktree. You will be given a worktree directory path as part of your delegation. All build and test operations target that worktree — never the main repo at `/home/stuart/Projects/Unreal/Vantage`.
+In this project, each feature or fix lives in its own git worktree. You will be given a worktree directory path as part of your delegation. All build and test operations target that worktree — never the default branch worktree at `/home/stuart/Projects/Unreal/Vantage/master`.
 
 ### At the start of every task
 
