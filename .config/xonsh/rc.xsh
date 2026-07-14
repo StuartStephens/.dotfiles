@@ -2,9 +2,6 @@ import os
 import shutil
 import subprocess
 
-if '/home/stuart/.local/bin' not in $PATH:
-    $PATH.insert(0, '/home/stuart/.local/bin')
-
 home_dir = os.path.expanduser("~")
 local_bin = os.path.join(home_dir, ".local", "bin")
 opencode_bin = os.path.join(home_dir, ".opencode", "bin")

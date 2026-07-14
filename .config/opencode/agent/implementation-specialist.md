@@ -174,7 +174,7 @@ Stuart's system — always produce commands and scripts compatible with this env
 - **Terminal**: WezTerm
 - **Editor**: Neovim (`nvim`)
 - **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
-- **Home directory**: `/home/stuart`
+- **Home directory**: `$HOME`
 - **Workflow**: Terminal-first. All commands and scripts must be CLI. Before suggesting any project-specific commands, actively read `~/.xonshrc` and `~/.config/xonsh/rc.xsh` to discover available aliases and use them over generic alternatives. Do not invent commands that the dotfiles already provide under a different name.
 
 ## Worktree Discipline
@@ -183,7 +183,7 @@ Every task you receive should include a worktree directory path. This is the onl
 
 ### At the start of every task
 
-1. **Confirm your working directory.** The delegation must specify a worktree path such as `/home/stuart/Projects/Unreal/Vantage-feature-war-gong`. If it does not, stop and ask the tech-lead for the worktree path before touching any files.
+1. **Confirm your working directory.** The delegation must specify a worktree path such as `$HOME/Projects/Unreal/Vantage-feature-war-gong`. If it does not, stop and ask the tech-lead for the worktree path before touching any files.
 2. **Run the staleness check** before writing any code:
    ```xonsh
    find /path/to/worktree/Source -name "*.cpp" -newer /path/to/worktree/Binaries/Linux/libUnrealEditor-Vantage.so -o -name "*.h" -newer /path/to/worktree/Binaries/Linux/libUnrealEditor-Vantage.so
@@ -194,7 +194,7 @@ Every task you receive should include a worktree directory path. This is the onl
 
 Always pass the worktree's `.uproject` path to the build command — never the main repo path:
 ```xonsh
-cd /home/stuart/Apps/Unreal && Engine/Build/BatchFiles/Linux/Build.sh VantageEditor Linux Development /path/to/worktree/Vantage.uproject -waitmutex
+cd $HOME/Apps/Unreal && Engine/Build/BatchFiles/Linux/Build.sh VantageEditor Linux Development /path/to/worktree/Vantage.uproject -waitmutex
 ```
 
 After a successful build, output the editor launch command for the worktree:

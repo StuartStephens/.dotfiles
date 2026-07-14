@@ -4,14 +4,11 @@ $PROMPT = '{env_name}{BOLD_GREEN}{user}@{hostname}{BOLD_BLUE} {cwd}{branch_color
 # XONSH WEBCONFIG END
 
 # Unreal Engine
-$UE_ROOT = "/home/stuart/Apps/Unreal"
+$UE_ROOT = f"{$HOME}/Apps/Unreal"
 $SDL_VIDEODRIVER = "x11"
 
 aliases["ue"] = [
     "env",
     "SDL_VIDEODRIVER=x11",
-    "/home/stuart/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor",
+    f"{$HOME}/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor",
 ]
-
-# netlify
-$NETLIFY_PERSONAL_ACCESS_TOKEN= "nfp_kymbF9QRQHst15cc4bGNgmwWMxAB7zQy8711"

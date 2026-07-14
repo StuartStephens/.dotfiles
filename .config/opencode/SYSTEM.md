@@ -19,7 +19,7 @@ All agents must read and respect this context. It applies regardless of whether 
 - **Package manager**: `pacman` / `yay` (AUR) — never suggest `apt`, `brew`, `snap`, or `dnf`
 - **Terminal**: WezTerm
 - **Editor**: Neovim (`nvim`)
-- **Home directory**: `/home/stuart`
+- **Home directory**: `$HOME` (expands to `/home/stuart` on CachyOS, `/home/sstephens` on Bazzite, `/Users/stuart` on macOS)
 - **Git identity**: Stuart <contact@stuartstephens.com>
 
 ## Terminal-First Workflow

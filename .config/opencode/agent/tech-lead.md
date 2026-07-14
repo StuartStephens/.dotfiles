@@ -216,7 +216,7 @@ Stuart's system — keep this in mind for every command, script, or instruction 
 - **Terminal**: WezTerm
 - **Editor**: Neovim (`nvim`)
 - **Package manager**: `pacman` / `yay` (AUR helper) — never suggest `apt`, `brew`, or `snap`
-- **Home directory**: `/home/stuart`
+- **Home directory**: `$HOME`
 
 When delegating to @implementation-specialist or @qa-engineer, always pass this environment context so they produce correct xonsh-compatible commands.
 
@@ -232,9 +232,9 @@ This is the primary development model. Every unit of work lives in its own git w
 1. Decide the branch name using project conventions (`feature/`, `fix/`, `refactor/`, `chore/`). One concern per branch — never mix a feature and a fix.
 2. Check whether the worktree already exists. If not, create it:
    ```xonsh
-   cd /home/stuart/Projects/Unreal/Vantage
+   cd $HOME/Projects/Unreal/Vantage
    git fetch origin
-   git worktree add /home/stuart/Projects/Unreal/Vantage-<branch-slug> -b <branch-name> origin/master
+   git worktree add $HOME/Projects/Unreal/Vantage-<branch-slug> -b <branch-name> origin/master
    ```
    Branch slashes become hyphens in the directory name: `feature/war-gong` → `Vantage-feature-war-gong`.
 3. Pass the full worktree directory path to the implementation agent as part of the delegation. The agent must work exclusively inside that directory.

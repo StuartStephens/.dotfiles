@@ -172,12 +172,12 @@ Stuart's system — all shell commands and test runner invocations must be xonsh
 - **OS**: CachyOS (Arch Linux)
 - **Shell**: xonsh — no bash syntax. No `export`, no `#!/bin/bash`. Use xonsh subprocess syntax.
 - **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
-- **Home directory**: `/home/stuart`
+- **Home directory**: `$HOME`
 - **Workflow**: Terminal-first. All test invocations are CLI commands run in xonsh. Before running project-specific commands, actively check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for available aliases and tooling — use them instead of generic equivalents.
 
 ## Worktree-Aware Verification
 
-In this project, each feature or fix lives in its own git worktree. You will be given a worktree directory path as part of your delegation. All build and test operations target that worktree — never the main repo at `/home/stuart/Projects/Unreal/Vantage`.
+In this project, each feature or fix lives in its own git worktree. You will be given a worktree directory path as part of your delegation. All build and test operations target that worktree — never the main repo at `$HOME/Projects/Unreal/Vantage`.
 
 ### At the start of every task
 
@@ -187,7 +187,7 @@ Confirm the worktree path from the delegation. If it is missing, stop and ask th
 
 Always use the worktree's `.uproject`:
 ```xonsh
-cd /home/stuart/Apps/Unreal && Engine/Build/BatchFiles/Linux/Build.sh VantageEditor Linux Development /path/to/worktree/Vantage.uproject -waitmutex
+cd $HOME/Apps/Unreal && Engine/Build/BatchFiles/Linux/Build.sh VantageEditor Linux Development /path/to/worktree/Vantage.uproject -waitmutex
 ```
 
 Confirm `Result: Succeeded` before running any in-editor verification. A stale binary will produce misleading results.
