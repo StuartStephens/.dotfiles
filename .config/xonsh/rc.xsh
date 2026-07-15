@@ -65,3 +65,18 @@ def _ssh_login(args, stdin=None):
     ssh-add -l
 
 aliases['ssh-login'] = _ssh_login
+
+# macOS Keychain secrets (machine-local, not in dotfiles)
+def _load_keychain_secret(service):
+    try:
+        result = subprocess.run(
+            ["security", "find-generic-password", "-a", os.environ.get("USER", ""), "-s", service, "-w"],
+            capture_output=True, text=True, check=True
+        )
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+
+_artifactory_token = _load_keychain_secret("ARTIFACTORY_TOKEN")
+if _artifactory_token:
+    $ARTIFACTORY_TOKEN = _artifactory_token
