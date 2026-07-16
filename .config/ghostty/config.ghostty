@@ -1,33 +1,4 @@
-# Ghostty Configuration for AMD RX 7900 GRE + Wayland (KDE Plasma)
-# Optimized to prevent flickering on Bazzite
+background-opacity = 0.8
 
-# === GTK/Wayland Compatibility ===
-# Disable single instance to prevent compositor conflicts
-gtk-single-instance = false
-
-# Disable GTK titlebar for better Wayland integration
-gtk-titlebar = false
-
-# === Cursor ===
-# Disable cursor blinking to reduce unnecessary redraws
 cursor-style = block
-cursor-style-blink = false
-
-# === Rendering Optimizations ===
-# Disable resize overlay which can cause flickering
-resize-overlay = never
-
-# Keep unfocused splits fully opaque
-unfocused-split-opacity = 1.0
-
-# === Font Rendering ===
-# Disable ligatures to reduce rendering complexity
-font-feature = -calt
-
-# === Appearance ===
-# Full opacity to avoid transparency rendering overhead
-background-opacity = 1.0
-
-# NOTE: To fully fix flickering on AMD + Wayland, launch Ghostty with:
-# MESA_GLTHREAD=false vblank_mode=3 __GL_YIELD=USLEEP GTK_NO_ANIMATIONS=1 ghostty
-# Or use the launcher script at /tmp/opencode/ghostty-fixed.sh
+cursor-style-blink = true
