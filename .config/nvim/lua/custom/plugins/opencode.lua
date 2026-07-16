@@ -34,8 +34,16 @@ do
     local opencode_port = pick_open_port()
     local opencode_cmd = string.format('opencode --port %d', opencode_port)
     local horizontal_terminal_opts = {
-      split = 'below',
-      height = math.max(12, math.floor(vim.o.lines * 0.35)),
+      win = {
+        position = 'bottom',
+        height = math.max(12, math.floor(vim.o.lines * 0.35)),
+      }
+    }
+    local vertical_terminal_opts = {
+      win = {
+        position = 'right',
+        width = math.max(80, math.floor(vim.o.columns * 0.4)),
+      }
     }
 
     -- ─── Status winbar ───────────────────────────────────────────────────────
@@ -103,7 +111,7 @@ do
 
     local function toggle_opencode_terminal(opts, label)
       run_opencode_terminal_action(function()
-        require('opencode.terminal').toggle(opencode_cmd, opts)
+        Snacks.terminal.toggle(opencode_cmd, opts)
       end, label)
     end
 
@@ -112,16 +120,16 @@ do
         port = opencode_port,
         start = function()
           run_opencode_terminal_action(function()
-            require('opencode.terminal').open(opencode_cmd)
+            Snacks.terminal.open(opencode_cmd)
           end, 'OpenCode terminal start')
         end,
         stop = function()
           run_opencode_terminal_action(function()
-            require('opencode.terminal').close()
+            Snacks.terminal.close()
           end, 'OpenCode terminal stop')
         end,
         toggle = function()
-          toggle_opencode_terminal(nil, 'OpenCode terminal toggle')
+          toggle_opencode_terminal(vertical_terminal_opts, 'OpenCode terminal toggle')
         end,
       },
     }
@@ -178,12 +186,16 @@ do
     end, { desc = 'Add this' })
 
     vim.keymap.set('n', '<leader>ot', function()
-      require('opencode').toggle()
+      toggle_opencode_terminal(vertical_terminal_opts, 'OpenCode terminal vertical toggle')
     end, { desc = 'Toggle embedded vertical' })
 
     vim.keymap.set('n', '<leader>oT', function()
       toggle_opencode_terminal(horizontal_terminal_opts, 'OpenCode terminal horizontal toggle')
     end, { desc = 'Toggle embedded horizontal' })
+
+    vim.keymap.set('n', '<leader>of', function()
+      toggle_opencode_terminal(nil, 'OpenCode terminal float toggle')
+    end, { desc = 'Toggle embedded float' })
 
     vim.keymap.set('n', '<leader>oc', function()
       require('opencode').command()
