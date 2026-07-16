@@ -1,4 +1,5 @@
 import os
+import platform
 import shutil
 import subprocess
 
@@ -53,10 +54,10 @@ if $XONSH_INTERACTIVE:
 $UE_ROOT = os.path.join(home_dir, "Apps", "Unreal")
 $SDL_VIDEODRIVER = "x11"
 
-# Always point at the systemd user ssh-agent socket so every shell (and
-# any process launched from it, e.g. nvim) can reach the agent without
-# needing to run ssh-login first.
-$SSH_AUTH_SOCK = f"/run/user/{os.getuid()}/ssh-agent.socket"
+# On Linux, point at the systemd user ssh-agent socket.
+# On macOS, launchd manages this automatically — don't override it.
+if platform.system() == "Linux":
+    $SSH_AUTH_SOCK = f"/run/user/{os.getuid()}/ssh-agent.socket"
 
 def _ssh_login(args, stdin=None):
     """Load SSH key into agent with 8-hour timeout."""
@@ -64,18 +65,3 @@ def _ssh_login(args, stdin=None):
     ssh-add -l
 
 aliases['ssh-login'] = _ssh_login
-
-# macOS Keychain secrets (machine-local, not in dotfiles)
-def _load_keychain_secret(service):
-    try:
-        result = subprocess.run(
-            ["security", "find-generic-password", "-a", os.environ.get("USER", ""), "-s", service, "-w"],
-            capture_output=True, text=True, check=True
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError:
-        return None
-
-_artifactory_token = _load_keychain_secret("ARTIFACTORY_TOKEN")
-if _artifactory_token:
-    $ARTIFACTORY_TOKEN = _artifactory_token
