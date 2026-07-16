@@ -1,6 +1,8 @@
+font-family = FiraCode Nerd Font Mono
+
 background-opacity = 0.8
 
 cursor-style = block
 cursor-style-blink = true
 
-command = /opt/homebrew/bin/xonsh
+command = xonsh
