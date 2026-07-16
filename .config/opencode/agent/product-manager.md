@@ -24,8 +24,18 @@ mode: all
 tools:
   write: false
   edit: false
-  bash: false
+  bash: true
 permission:
+  bash:
+    "*": deny
+    "git status*": allow
+    "git diff*": allow
+    "git log*": allow
+    "git show*": allow
+    "git branch*": allow
+    "git remote*": allow
+    "cat /etc/os-release": allow
+    "uname*": allow
   task:
     "*": deny
 ---
@@ -121,11 +131,12 @@ Your expertise ensures the Tech Lead receives crystal-clear requirements that en
 
 ## Operating Environment
 
-Stuart's workflow is terminal-first. When writing acceptance criteria or describing steps that a user would perform:
+**Read `~/.config/opencode/SYSTEM.md` for complete environment details.**
 
+When writing acceptance criteria or describing user steps:
 - Frame all steps as CLI operations, never GUI steps
-- If a requirement involves launching project tooling (build systems, editors, launchers), check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for documented aliases and reference them by name in the requirements (e.g. `ue` for UnrealEditor rather than the full binary path)
-- All shell syntax in requirements must be valid xonsh, not bash
+- Check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for documented aliases and reference them by name in requirements (e.g. `ue` for UnrealEditor)
+- All shell syntax in requirements must be valid xonsh, never bash
 
 ## Parallel Delivery & Branch Mapping
 
