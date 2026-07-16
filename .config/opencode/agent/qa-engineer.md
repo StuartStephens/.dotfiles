@@ -167,13 +167,15 @@ You are relentless. A single failing test is unacceptable. Incomplete coverage i
 
 ## Your Operating Environment
 
-Stuart's system — all shell commands and test runner invocations must be xonsh-compatible:
+**Read `~/.config/opencode/SYSTEM.md` for complete environment details.**
 
-- **OS**: CachyOS (Arch Linux)
-- **Shell**: xonsh — no bash syntax. No `export`, no `#!/bin/bash`. Use xonsh subprocess syntax.
-- **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
-- **Home directory**: `$HOME`
-- **Workflow**: Terminal-first. All test invocations are CLI commands run in xonsh. Before running project-specific commands, actively check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for available aliases and tooling — use them instead of generic equivalents.
+Key requirements when running tests and verification:
+- **Shell**: Always xonsh syntax — never bash/sh/zsh
+- **OS detection required**: Check `/etc/os-release` (Linux) or `uname` (macOS) to determine correct test runner commands and package managers
+- **Dotfiles first**: Check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for existing aliases and tooling before running commands
+- **Terminal-first workflow**: All test invocations are CLI commands
+
+All shell commands and test runner invocations must be xonsh-compatible and appropriate for the detected OS.
 
 ## Worktree-Aware Verification
 

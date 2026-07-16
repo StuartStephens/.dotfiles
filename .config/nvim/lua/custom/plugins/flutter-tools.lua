@@ -5,10 +5,5 @@ vim.pack.add {
 }
 
 require('flutter-tools').setup {}
-vim.lsp.document_color.enable()
-vim.lsp.config('dartls', {})
-vim.lsp.enable 'dartls'
-
-if vim.fn.executable 'tree-sitter' == 1 then
-  require('nvim-treesitter').install 'dart'
-end
+-- Note: flutter-tools automatically handles dartls LSP setup
+-- Tree-sitter dart parser will auto-install when opening .dart files

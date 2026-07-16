@@ -23,7 +23,9 @@ path_entries = (
     android_emulator_bin,
     opencode_bin,
     local_bin,
-    "/opt/homebrew/bin",
+    "/home/linuxbrew/.linuxbrew/bin",  # Linux homebrew
+    "/home/linuxbrew/.linuxbrew/sbin",
+    "/opt/homebrew/bin",  # macOS homebrew
     "/opt/homebrew/sbin",
     "/usr/local/bin",
     "/usr/local/sbin",
