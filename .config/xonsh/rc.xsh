@@ -9,7 +9,9 @@ opencode_bin = os.path.join(home_dir, ".opencode", "bin")
 path_entries = (
     opencode_bin,
     local_bin,
-    "/opt/homebrew/bin",
+    "/home/linuxbrew/.linuxbrew/bin",  # Linux homebrew
+    "/home/linuxbrew/.linuxbrew/sbin",
+    "/opt/homebrew/bin",  # macOS homebrew
     "/opt/homebrew/sbin",
     "/usr/local/bin",
     "/usr/local/sbin",

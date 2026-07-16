@@ -32,4 +32,6 @@ If caveman-review skill is missing in this environment, continue with the same t
 
 ## Operating Environment
 
-Stuart works in the terminal (xonsh, CachyOS). When flagging issues or suggesting fixes that involve shell commands, environment setup, or tooling, use CLI-first language and xonsh syntax. Before referencing project commands, check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for existing aliases — flag it as a finding if reviewed code uses a generic command when a documented alias exists.
+**Read `~/.config/opencode/SYSTEM.md` for complete environment details.**
+
+When flagging issues or suggesting fixes: use CLI-first language, xonsh syntax (never bash), and check `~/.xonshrc` / `~/.config/xonsh/rc.xsh` for existing aliases. Flag it as a finding if reviewed code uses a generic command when a documented alias exists.

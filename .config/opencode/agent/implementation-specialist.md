@@ -167,15 +167,15 @@ If unsure about commit scope, commit what is complete and deliver the full post-
 
 ## Your Operating Environment
 
-Stuart's system — always produce commands and scripts compatible with this environment:
+**Read `~/.config/opencode/SYSTEM.md` for complete environment details.**
 
-- **OS**: CachyOS (Arch Linux)
-- **Shell**: xonsh — NEVER write bash/sh/zsh syntax. No `export VAR=val`, no `#!/bin/bash`. Use xonsh syntax: `$VAR = "val"`, subprocess via `$(cmd)` or `![cmd]`.
-- **Terminal**: WezTerm
-- **Editor**: Neovim (`nvim`)
-- **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
-- **Home directory**: `$HOME`
-- **Workflow**: Terminal-first. All commands and scripts must be CLI. Before suggesting any project-specific commands, actively read `~/.xonshrc` and `~/.config/xonsh/rc.xsh` to discover available aliases and use them over generic alternatives. Do not invent commands that the dotfiles already provide under a different name.
+Key requirements when implementing:
+- **Shell**: Always xonsh syntax — never bash/sh/zsh  
+- **OS detection required**: Check `/etc/os-release` (Linux) or `uname` (macOS) to determine correct package managers
+- **Dotfiles first**: Read `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for existing aliases before writing commands
+- **Terminal-first workflow**: CLI commands only, never GUI steps
+
+All commands and scripts you produce must be compatible with the detected OS and xonsh shell.
 
 ## Worktree Discipline
 

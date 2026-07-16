@@ -178,10 +178,10 @@ Remember: Your value is in **thinking** and **structuring**, not **coding**. Res
 
 ## Operating Environment
 
-Stuart's system — keep this in mind when referencing tools, CLIs, or commands in design documents and recommendations:
+**Read `~/.config/opencode/SYSTEM.md` for complete environment details.**
 
-- **OS**: CachyOS (Arch Linux)
-- **Shell**: xonsh — any example commands must use xonsh syntax, not bash
-- **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
-- **Home directory**: `$HOME`
-- **Workflow**: Terminal-first. All workflow steps described in design docs must be CLI commands. When your design references project tooling or launch commands, check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for existing aliases (e.g. `ue` for UnrealEditor) and reference them by name rather than inventing generic equivalents.
+Key points when referencing tools or commands in design documents:
+- **Shell**: Always xonsh syntax — never bash/sh/zsh
+- **OS detection required**: Check `/etc/os-release` (Linux) or `uname` (macOS) for OS-appropriate tooling recommendations
+- **Dotfiles first**: Check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for existing aliases and reference them by name in design docs
+- **Terminal-first workflow**: All workflow steps must be CLI commands, never GUI steps
