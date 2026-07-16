@@ -1,7 +1,21 @@
 [user]
-	name = Stuart
+	name = Stuart Stephens
 	email = contact@stuartstephens.com
+
 [push]
 	autoSetupRemote = true
+
+[credential]
+	helper = store
+
+[commit]
+	gpgsign = true
+
+[gpg]
+	format = ssh
+
+[user]
+	signingkey = ~/.ssh/id_ed25519.pub
+
 [include]
 	path = ~/.gitconfig.local

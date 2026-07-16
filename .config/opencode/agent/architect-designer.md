@@ -183,5 +183,5 @@ Stuart's system — keep this in mind when referencing tools, CLIs, or commands 
 - **OS**: CachyOS (Arch Linux)
 - **Shell**: xonsh — any example commands must use xonsh syntax, not bash
 - **Package manager**: `pacman` / `yay` (AUR) — never `apt`, `brew`, or `snap`
-- **Home directory**: `/home/stuart`
+- **Home directory**: `$HOME`
 - **Workflow**: Terminal-first. All workflow steps described in design docs must be CLI commands. When your design references project tooling or launch commands, check `~/.xonshrc` and `~/.config/xonsh/rc.xsh` for existing aliases (e.g. `ue` for UnrealEditor) and reference them by name rather than inventing generic equivalents.
