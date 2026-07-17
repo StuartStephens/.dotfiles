@@ -1,5 +1,5 @@
 ---
-model: "github-copilot/claude-sonnet-4.6"
+model: "github-copilot/claude-sonnet-4.5"
 variant: "max"
 description: >-
   Use this agent when you need high-level technical design, architectural
