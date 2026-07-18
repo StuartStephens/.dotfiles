@@ -12,6 +12,3 @@ aliases["ue"] = [
     "SDL_VIDEODRIVER=x11",
     f"{$HOME}/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor",
 ]
-
-# Use homebrew neovim (0.12+) instead of system version
-aliases["nvim"] = "/home/linuxbrew/.linuxbrew/bin/nvim"
