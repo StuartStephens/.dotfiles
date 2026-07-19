@@ -60,7 +60,10 @@ DEFAULTS: dict = {
     "local_files_only": True,     # avoid HF checks once model is cached
     "sample_rate": 16000,
     "typer": "auto",             # auto | wtype | ydotool | xdotool
-    "ydotool_key_delay_ms": 2,
+    "ydotool_key_delay_ms": 0,
+    "output_mode": "type",       # type | paste | auto
+    "paste_method": "auto",      # auto | ydotool | xdotool
+    "paste_min_chars": 24,
     "exclusive_grab": True,
     # whisper-cli (whisper.cpp) backend settings
     "whisper_cli": "",
@@ -355,7 +358,7 @@ def _type_wtype(text: str) -> tuple[bool, str]:
     return _run_cmd(["wtype", "--", text])
 
 
-def _type_ydotool(text: str, key_delay_ms: int = 2) -> tuple[bool, str]:
+def _type_ydotool(text: str, key_delay_ms: int = 0) -> tuple[bool, str]:
     if not shutil.which("ydotool"):
         return False, "ydotool not found"
 
@@ -378,6 +381,43 @@ def _type_xdotool(text: str) -> tuple[bool, str]:
     return _run_cmd(["xdotool", "type", "--delay", "1", "--", text])
 
 
+def _paste_ydotool() -> tuple[bool, str]:
+    if not shutil.which("ydotool"):
+        return False, "ydotool not found"
+
+    # Try Ctrl+V, then Shift+Insert.
+    combos = [
+        (["29:1", "47:1", "47:0", "29:0"], "ctrl+v"),
+        (["42:1", "110:1", "110:0", "42:0"], "shift+insert"),
+    ]
+
+    errors: list[str] = []
+    for seq, label in combos:
+        ok, msg = _run_cmd(["ydotool", "key", *seq])
+        if ok:
+            return True, label
+        if msg:
+            errors.append(msg)
+
+    detail = "; ".join(errors[-2:]) if errors else "ydotool paste failed"
+    return False, detail
+
+
+def _paste_xdotool() -> tuple[bool, str]:
+    if not shutil.which("xdotool"):
+        return False, "xdotool not found"
+
+    ok, msg = _run_cmd(["xdotool", "key", "--clearmodifiers", "ctrl+v"])
+    if ok:
+        return True, "ctrl+v"
+
+    ok2, msg2 = _run_cmd(["xdotool", "key", "--clearmodifiers", "Shift+Insert"])
+    if ok2:
+        return True, "shift+insert"
+
+    return False, msg2 or msg
+
+
 def _copy_clipboard(text: str) -> tuple[bool, str]:
     if shutil.which("wl-copy"):
         ok, msg = _run_cmd(["wl-copy"], text_input=text)
@@ -390,7 +430,7 @@ def _copy_clipboard(text: str) -> tuple[bool, str]:
     return False, "no clipboard tool found (need wl-copy or xclip)"
 
 
-def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 2) -> tuple[bool, str]:
+def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 0) -> tuple[bool, str]:
     if not text:
         return True, "empty"
 
@@ -439,6 +479,74 @@ def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 2) -> 
 
     detail = "; ".join(errors[-2:]) if errors else "unknown typing error"
     return False, f"typing failed; {detail}"
+
+
+def paste_text(text: str, paste_method: str = "auto") -> tuple[bool, str]:
+    if not text:
+        return True, "empty"
+
+    ok, copy_msg = _copy_clipboard(text)
+    if not ok:
+        return False, copy_msg
+
+    methods = {
+        "ydotool": _paste_ydotool,
+        "xdotool": _paste_xdotool,
+    }
+
+    if paste_method == "auto":
+        if os.environ.get("WAYLAND_DISPLAY"):
+            order = ["ydotool", "xdotool"]
+        else:
+            order = ["xdotool", "ydotool"]
+    else:
+        order = [paste_method] + [m for m in ("ydotool", "xdotool") if m != paste_method]
+
+    errors: list[str] = []
+    for name in order:
+        fn = methods.get(name)
+        if not fn:
+            continue
+        ok, msg = fn()
+        if ok:
+            return True, f"pasted via {name} ({msg}; {copy_msg})"
+        if msg:
+            errors.append(f"{name}: {msg}")
+
+    detail = "; ".join(errors[-2:]) if errors else "unknown paste error"
+    return False, f"paste failed; {detail}"
+
+
+def output_text(
+    text: str,
+    output_mode: str = "type",
+    typer: str = "auto",
+    ydotool_key_delay_ms: int = 0,
+    paste_method: str = "auto",
+    paste_min_chars: int = 24,
+) -> tuple[bool, str]:
+    mode = str(output_mode or "type").strip().lower()
+    if mode not in ("type", "paste", "auto"):
+        mode = "type"
+
+    if mode == "type":
+        return type_text(text, typer, ydotool_key_delay_ms)
+
+    if mode == "paste":
+        return paste_text(text, paste_method)
+
+    threshold = max(0, int(paste_min_chars or 0))
+    if len(text) >= threshold:
+        ok, msg = paste_text(text, paste_method)
+        if ok:
+            return True, msg
+
+        ok2, msg2 = type_text(text, typer, ydotool_key_delay_ms)
+        if ok2:
+            return True, f"{msg}; fallback {msg2}"
+        return False, f"{msg}; fallback {msg2}"
+
+    return type_text(text, typer, ydotool_key_delay_ms)
 
 
 def notify(title: str, body: str = "") -> None:
@@ -959,15 +1067,20 @@ async def run(cfg: dict) -> None:
                 print(f"  [{elapsed:.1f}s] {text}")
 
                 if text:
-                    ok, msg = type_text(
+                    t_out = time.time()
+                    ok, msg = output_text(
                         text,
+                        cfg.get("output_mode", "type"),
                         cfg.get("typer", "auto"),
-                        int(cfg.get("ydotool_key_delay_ms", 2) or 0),
+                        int(cfg.get("ydotool_key_delay_ms", 0) or 0),
+                        cfg.get("paste_method", "auto"),
+                        int(cfg.get("paste_min_chars", 24) or 0),
                     )
+                    out_elapsed_ms = (time.time() - t_out) * 1000.0
                     if ok:
-                        print(f"  [type] {msg}")
+                        print(f"  [out {out_elapsed_ms:.0f}ms] {msg}")
                     else:
-                        print(f"  [type] {msg}")
+                        print(f"  [out {out_elapsed_ms:.0f}ms] {msg}")
                         notify("whisper-ptt", msg)
 
                 active_key = active_mode = None
