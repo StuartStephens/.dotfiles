@@ -13,6 +13,7 @@
   },
   "permission": {
     "bash": {
+      "*": "deny",
       "git status*": "allow",
       "git diff*": "allow",
       "git log*": "allow",
@@ -20,6 +21,9 @@
       "git branch*": "allow",
       "git remote*": "allow",
       "git worktree*": "allow",
+      "git add*": "allow",
+      "git commit*": "allow",
+      "git push*": "allow",
       "ls*": "allow",
       "pwd": "allow",
       "whoami": "allow",
@@ -31,8 +35,7 @@
       "du*": "allow",
       "stat*": "allow",
       "wc*": "allow",
-      "tree*": "allow",
-      "*": "deny"
+      "tree*": "allow"
     },
     "glob": "allow",
     "read": "allow",

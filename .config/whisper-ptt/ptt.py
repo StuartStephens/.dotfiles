@@ -77,6 +77,7 @@ DEFAULTS: dict = {
     "whisper_server_health_url": "http://127.0.0.1:8178/health",
     "whisper_server_request_timeout": 120,
     "whisper_server_startup_wait": 45,
+    "whisper_server_accurate_vad": False,
     # cold-start mitigation
     "warmup_on_start": True,
     "warmup_mode": "quick",      # quick | accurate
@@ -376,7 +377,8 @@ def _type_ydotool(text: str, key_delay_ms: int = 0) -> tuple[bool, str]:
         return False, "ydotool not found"
 
     kd = max(0, min(int(key_delay_ms), 50))
-    timeout_s = max(2.0, min(25.0, 1.5 + ((len(text) * max(1, kd + 1)) / 1200.0)))
+    base_per_char = 0.015 + (kd / 1000.0)
+    timeout_s = max(4.0, min(90.0, 2.0 + (len(text) * base_per_char * 2.0)))
 
     ok, msg = _run_cmd(["ydotool", "type", "-d", str(kd), "--", text], timeout_s=timeout_s)
     if ok:
@@ -482,7 +484,7 @@ def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 0) -> 
         else:
             order = ["xdotool", "ydotool", "wtype"]
     else:
-        order = [typer] + [m for m in ("wtype", "ydotool", "xdotool") if m != typer]
+        order = [typer]
 
     errors: list[str] = []
     for name in order:
@@ -502,7 +504,7 @@ def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 0) -> 
         if ok:
             return False, f"typing failed; {msg}"
 
-    detail = "; ".join(errors[-2:]) if errors else "unknown typing error"
+    detail = "; ".join(errors[:3]) if errors else "unknown typing error"
     return False, f"typing failed; {detail}"
 
 
@@ -780,15 +782,17 @@ def transcribe_whisper_server(audio, mode: str, cfg: dict) -> str:
                 }
             )
         else:
+            use_vad = bool(cfg.get("whisper_server_accurate_vad", False))
             fields.update(
                 {
                     "beam_size": "4",
                     "best_of": "2",
                     "temperature_inc": "0.2",
-                    "vad": "true",
-                    "vad_min_silence_duration_ms": "500",
+                    "vad": "true" if use_vad else "false",
                 }
             )
+            if use_vad:
+                fields["vad_min_silence_duration_ms"] = "500"
 
         body, content_type = _multipart_form_data(fields, "file", wav_path)
         req = urllib.request.Request(
