@@ -65,6 +65,10 @@ DEFAULTS: dict = {
     "paste_method": "auto",      # auto | ydotool | xdotool
     "paste_min_chars": 24,
     "output_timeout_s": 8,
+    "submit_on_accurate": False,
+    "submit_typer": "auto",      # auto | wtype | ydotool | xdotool
+    "submit_delay_ms": 0,
+    "submit_timeout_s": 5,
     "exclusive_grab": True,
     # whisper-cli (whisper.cpp) backend settings
     "whisper_cli": "",
@@ -396,6 +400,55 @@ def _type_xdotool(text: str) -> tuple[bool, str]:
         return False, "xdotool not found"
     timeout_s = max(3.0, min(30.0, 2.0 + len(text) / 80.0))
     return _run_cmd(["xdotool", "type", "--delay", "1", "--", text], timeout_s=timeout_s)
+
+
+def _enter_wtype() -> tuple[bool, str]:
+    if not shutil.which("wtype"):
+        return False, "wtype not found"
+    return _run_cmd(["wtype", "-k", "Return"], timeout_s=3.0)
+
+
+def _enter_ydotool() -> tuple[bool, str]:
+    if not shutil.which("ydotool"):
+        return False, "ydotool not found"
+    return _run_cmd(["ydotool", "key", "28:1", "28:0"], timeout_s=3.0)
+
+
+def _enter_xdotool() -> tuple[bool, str]:
+    if not shutil.which("xdotool"):
+        return False, "xdotool not found"
+    return _run_cmd(["xdotool", "key", "--clearmodifiers", "Return"], timeout_s=3.0)
+
+
+def submit_enter(submit_typer: str = "auto") -> tuple[bool, str]:
+    methods = {
+        "wtype": _enter_wtype,
+        "ydotool": _enter_ydotool,
+        "xdotool": _enter_xdotool,
+    }
+
+    mode = str(submit_typer or "auto").strip().lower()
+    if mode == "auto":
+        if os.environ.get("WAYLAND_DISPLAY"):
+            order = ["ydotool", "wtype", "xdotool"]
+        else:
+            order = ["xdotool", "ydotool", "wtype"]
+    else:
+        order = [mode]
+
+    errors: list[str] = []
+    for name in order:
+        fn = methods.get(name)
+        if not fn:
+            continue
+        ok, msg = fn()
+        if ok:
+            return True, f"enter via {name}"
+        if msg:
+            errors.append(f"{name}: {msg}")
+
+    detail = "; ".join(errors[:3]) if errors else "unknown submit error"
+    return False, f"submit failed; {detail}"
 
 
 def _paste_ydotool() -> tuple[bool, str]:
@@ -1132,6 +1185,37 @@ async def run(cfg: dict) -> None:
                     out_elapsed_ms = (time.time() - t_out) * 1000.0
                     if ok:
                         print(f"  [out {out_elapsed_ms:.0f}ms] {msg}")
+
+                        if active_mode == "accurate" and bool(cfg.get("submit_on_accurate", False)):
+                            submit_delay_ms = max(0, min(2000, int(cfg.get("submit_delay_ms", 0) or 0)))
+                            if submit_delay_ms:
+                                await asyncio.sleep(submit_delay_ms / 1000.0)
+
+                            submit_timeout = max(
+                                1,
+                                min(20, int(cfg.get("submit_timeout_s", 5) or 5)),
+                            )
+                            t_submit = time.time()
+                            try:
+                                s_ok, s_msg = await asyncio.wait_for(
+                                    loop.run_in_executor(
+                                        None,
+                                        submit_enter,
+                                        cfg.get("submit_typer", cfg.get("typer", "auto")),
+                                    ),
+                                    timeout=float(submit_timeout),
+                                )
+                            except asyncio.TimeoutError:
+                                s_ok, s_msg = False, f"submit timeout after {submit_timeout}s"
+                            except Exception as e:
+                                s_ok, s_msg = False, f"submit error: {e}"
+
+                            submit_elapsed_ms = (time.time() - t_submit) * 1000.0
+                            if s_ok:
+                                print(f"  [submit {submit_elapsed_ms:.0f}ms] {s_msg}")
+                            else:
+                                print(f"  [submit {submit_elapsed_ms:.0f}ms] {s_msg}")
+                                notify("whisper-ptt", s_msg)
                     else:
                         print(f"  [out {out_elapsed_ms:.0f}ms] {msg}")
                         notify("whisper-ptt", msg)
