@@ -7,3 +7,4 @@
 .config/nvim/nvim
 .gitconfig.local
 .DS_Store
+.config/whisper-ptt/config.json
