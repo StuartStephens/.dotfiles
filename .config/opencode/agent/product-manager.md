@@ -1,5 +1,5 @@
 ---
-model: "github-copilot/claude-sonnet-4.5"
+model: "github-copilot/claude-opus-4.5"
 variant: "max"
 description: >-
   Use this agent when the Tech Lead needs precise, well-defined requirements

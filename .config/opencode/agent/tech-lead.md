@@ -1,5 +1,5 @@
 ---
-model: "github-copilot/claude-sonnet-4.5"
+model: "github-copilot/gpt-5.3-codex"
 variant: "max"
 description: >-
   Use this agent when you need a senior AI developer to orchestrate complex
