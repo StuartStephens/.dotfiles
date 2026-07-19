@@ -64,6 +64,7 @@ DEFAULTS: dict = {
     "output_mode": "type",       # type | paste | auto
     "paste_method": "auto",      # auto | ydotool | xdotool
     "paste_min_chars": 24,
+    "output_timeout_s": 8,
     "exclusive_grab": True,
     # whisper-cli (whisper.cpp) backend settings
     "whisper_cli": "",
@@ -337,15 +338,26 @@ class Recorder:
 # Output: type text + notifications
 # ---------------------------------------------------------------------------
 
-def _run_cmd(cmd: list[str], text_input: str | None = None) -> tuple[bool, str]:
-    p = subprocess.run(
-        cmd,
-        input=text_input,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
+def _run_cmd(
+    cmd: list[str],
+    text_input: str | None = None,
+    timeout_s: float = 8.0,
+) -> tuple[bool, str]:
+    try:
+        p = subprocess.run(
+            cmd,
+            input=text_input,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            timeout=max(0.5, float(timeout_s)),
+        )
+    except subprocess.TimeoutExpired:
+        return False, f"timeout after {timeout_s:.1f}s"
+    except Exception as e:
+        return False, str(e)
+
     if p.returncode == 0:
         return True, ""
     msg = (p.stderr or p.stdout or f"exit {p.returncode}").strip()
@@ -355,7 +367,8 @@ def _run_cmd(cmd: list[str], text_input: str | None = None) -> tuple[bool, str]:
 def _type_wtype(text: str) -> tuple[bool, str]:
     if not shutil.which("wtype"):
         return False, "wtype not found"
-    return _run_cmd(["wtype", "--", text])
+    timeout_s = max(3.0, min(20.0, 2.0 + len(text) / 100.0))
+    return _run_cmd(["wtype", "--", text], timeout_s=timeout_s)
 
 
 def _type_ydotool(text: str, key_delay_ms: int = 0) -> tuple[bool, str]:
@@ -363,13 +376,14 @@ def _type_ydotool(text: str, key_delay_ms: int = 0) -> tuple[bool, str]:
         return False, "ydotool not found"
 
     kd = max(0, min(int(key_delay_ms), 50))
+    timeout_s = max(2.0, min(25.0, 1.5 + ((len(text) * max(1, kd + 1)) / 1200.0)))
 
-    ok, msg = _run_cmd(["ydotool", "type", "-d", str(kd), text])
+    ok, msg = _run_cmd(["ydotool", "type", "-d", str(kd), "--", text], timeout_s=timeout_s)
     if ok:
         return True, ""
 
-    # Some versions parse "--" more reliably.
-    ok2, msg2 = _run_cmd(["ydotool", "type", "-d", str(kd), "--", text])
+    # Fallback for older builds that do not handle "--".
+    ok2, msg2 = _run_cmd(["ydotool", "type", "-d", str(kd), text], timeout_s=timeout_s)
     if ok2:
         return True, ""
     return False, msg2 or msg
@@ -378,7 +392,8 @@ def _type_ydotool(text: str, key_delay_ms: int = 0) -> tuple[bool, str]:
 def _type_xdotool(text: str) -> tuple[bool, str]:
     if not shutil.which("xdotool"):
         return False, "xdotool not found"
-    return _run_cmd(["xdotool", "type", "--delay", "1", "--", text])
+    timeout_s = max(3.0, min(30.0, 2.0 + len(text) / 80.0))
+    return _run_cmd(["xdotool", "type", "--delay", "1", "--", text], timeout_s=timeout_s)
 
 
 def _paste_ydotool() -> tuple[bool, str]:
@@ -393,7 +408,7 @@ def _paste_ydotool() -> tuple[bool, str]:
 
     errors: list[str] = []
     for seq, label in combos:
-        ok, msg = _run_cmd(["ydotool", "key", *seq])
+        ok, msg = _run_cmd(["ydotool", "key", *seq], timeout_s=3.0)
         if ok:
             return True, label
         if msg:
@@ -407,11 +422,14 @@ def _paste_xdotool() -> tuple[bool, str]:
     if not shutil.which("xdotool"):
         return False, "xdotool not found"
 
-    ok, msg = _run_cmd(["xdotool", "key", "--clearmodifiers", "ctrl+v"])
+    ok, msg = _run_cmd(["xdotool", "key", "--clearmodifiers", "ctrl+v"], timeout_s=3.0)
     if ok:
         return True, "ctrl+v"
 
-    ok2, msg2 = _run_cmd(["xdotool", "key", "--clearmodifiers", "Shift+Insert"])
+    ok2, msg2 = _run_cmd(
+        ["xdotool", "key", "--clearmodifiers", "Shift+Insert"],
+        timeout_s=3.0,
+    )
     if ok2:
         return True, "shift+insert"
 
@@ -420,11 +438,15 @@ def _paste_xdotool() -> tuple[bool, str]:
 
 def _copy_clipboard(text: str) -> tuple[bool, str]:
     if shutil.which("wl-copy"):
-        ok, msg = _run_cmd(["wl-copy"], text_input=text)
+        ok, msg = _run_cmd(["wl-copy"], text_input=text, timeout_s=4.0)
         if ok:
             return True, "copied to clipboard with wl-copy"
     if shutil.which("xclip"):
-        ok, msg = _run_cmd(["xclip", "-selection", "clipboard"], text_input=text)
+        ok, msg = _run_cmd(
+            ["xclip", "-selection", "clipboard"],
+            text_input=text,
+            timeout_s=4.0,
+        )
         if ok:
             return True, "copied to clipboard with xclip"
     return False, "no clipboard tool found (need wl-copy or xclip)"
@@ -473,9 +495,12 @@ def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 0) -> 
         if msg:
             errors.append(f"{name}: {msg}")
 
-    ok, msg = _copy_clipboard(text)
-    if ok:
-        return False, f"typing failed; {msg}"
+    # Clipboard fallback is only used in auto mode to avoid side effects
+    # when the user explicitly selected a typer.
+    if typer == "auto":
+        ok, msg = _copy_clipboard(text)
+        if ok:
+            return False, f"typing failed; {msg}"
 
     detail = "; ".join(errors[-2:]) if errors else "unknown typing error"
     return False, f"typing failed; {detail}"
@@ -1009,14 +1034,27 @@ async def run(cfg: dict) -> None:
                 t0 = time.time()
 
                 if backend == "whisper-server":
+                    req_timeout = max(
+                        5,
+                        min(300, int(cfg.get("whisper_server_request_timeout", 120) or 120)),
+                    )
                     try:
-                        text = await loop.run_in_executor(
-                            None,
-                            transcribe_whisper_server,
-                            audio,
-                            active_mode,
-                            cfg,
+                        text = await asyncio.wait_for(
+                            loop.run_in_executor(
+                                None,
+                                transcribe_whisper_server,
+                                audio,
+                                active_mode,
+                                cfg,
+                            ),
+                            timeout=float(req_timeout + 2),
                         )
+                    except asyncio.TimeoutError:
+                        msg = f"whisper-server timeout after {req_timeout + 2}s"
+                        print(f"  [err] {msg}")
+                        notify("whisper-ptt", msg)
+                        active_key = active_mode = None
+                        continue
                     except RuntimeError as e:
                         print(f"  [err] {e}")
                         notify("whisper-ptt", str(e))
@@ -1068,14 +1106,25 @@ async def run(cfg: dict) -> None:
 
                 if text:
                     t_out = time.time()
-                    ok, msg = output_text(
-                        text,
-                        cfg.get("output_mode", "type"),
-                        cfg.get("typer", "auto"),
-                        int(cfg.get("ydotool_key_delay_ms", 0) or 0),
-                        cfg.get("paste_method", "auto"),
-                        int(cfg.get("paste_min_chars", 24) or 0),
-                    )
+                    out_timeout = max(2, min(60, int(cfg.get("output_timeout_s", 8) or 8)))
+                    try:
+                        ok, msg = await asyncio.wait_for(
+                            loop.run_in_executor(
+                                None,
+                                output_text,
+                                text,
+                                cfg.get("output_mode", "type"),
+                                cfg.get("typer", "auto"),
+                                int(cfg.get("ydotool_key_delay_ms", 0) or 0),
+                                cfg.get("paste_method", "auto"),
+                                int(cfg.get("paste_min_chars", 24) or 0),
+                            ),
+                            timeout=float(out_timeout),
+                        )
+                    except asyncio.TimeoutError:
+                        ok, msg = False, f"output timeout after {out_timeout}s"
+                    except Exception as e:
+                        ok, msg = False, f"output error: {e}"
                     out_elapsed_ms = (time.time() - t_out) * 1000.0
                     if ok:
                         print(f"  [out {out_elapsed_ms:.0f}ms] {msg}")
