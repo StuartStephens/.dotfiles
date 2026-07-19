@@ -1,0 +1,13 @@
+[Unit]
+Description=Whisper.cpp Persistent Server
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/whisper-server -m %h/.local/share/whisper.cpp/models/ggml-large-v3-turbo.bin --host 127.0.0.1 --port 8178 -l en -t 14 -dev 0 -fa
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

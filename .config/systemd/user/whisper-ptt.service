@@ -1,0 +1,18 @@
+[Unit]
+Description=Whisper Push-to-Talk Daemon
+After=graphical-session.target
+After=ydotoold.service
+After=whisper-server.service
+PartOf=graphical-session.target
+Wants=ydotoold.service
+Wants=whisper-server.service
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.local/share/whisper-ptt/venv/bin/python -u %h/.config/whisper-ptt/ptt.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
