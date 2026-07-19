@@ -7,8 +7,41 @@ $PROMPT = '{env_name}{BOLD_PURPLE}{user}@{hostname}{BOLD_GREEN} {cwd}{branch_col
 $UE_ROOT = f"{$HOME}/Apps/Unreal"
 $SDL_VIDEODRIVER = "x11"
 
-aliases["ue"] = [
-    "env",
-    "SDL_VIDEODRIVER=x11",
-    f"{$HOME}/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor",
-]
+def _ue(args, stdin=None):
+    """Open UE with an absolute path — relative paths break against the engine binary location."""
+    import subprocess, os, glob
+    if args:
+        uproject = os.path.abspath(args[0])
+    else:
+        projects = glob.glob("*.uproject")
+        if not projects:
+            print("ue: no .uproject found in current directory")
+            return
+        uproject = os.path.abspath(projects[0])
+    env = os.environ.copy()
+    env["SDL_VIDEODRIVER"] = "x11"
+    subprocess.Popen([f"{$HOME}/Apps/Unreal/Engine/Binaries/Linux/UnrealEditor", uproject], env=env)
+
+aliases["ue"] = _ue
+
+def _wt(args, stdin=None):
+    """wt wrapper — handles cd for switch since xonsh shell integration isn't supported."""
+    import subprocess, re, os, shutil
+    args = list(args)
+    wt_bin = shutil.which("wt")
+    if args and args[0] == "switch":
+        result = subprocess.run([wt_bin] + args, capture_output=True, text=True)
+        output = result.stdout + result.stderr
+        for line in output.splitlines():
+            if line.strip() and "Shell integration not yet supported" not in line:
+                if "cannot change directory" not in line:
+                    print(line)
+        match = re.search(r'@ (~[^\s,\n]+|/[^\s,\n]+)', output)
+        if match:
+            path = os.path.expanduser(match.group(1).rstrip(','))
+            if os.path.isdir(path):
+                os.chdir(path)
+    else:
+        subprocess.run([wt_bin] + args)
+
+aliases["wt"] = _wt
