@@ -63,6 +63,8 @@ DEFAULTS: dict = {
     "ydotool_key_delay_ms": 0,
     "output_mode": "type",       # type | paste | auto
     "paste_method": "auto",      # auto | ydotool | xdotool
+    "paste_shortcut": "auto",    # auto | ctrl-shift-v | shift-insert | ctrl-v
+    "paste_fallback_to_type": True,
     "paste_min_chars": 24,
     "output_timeout_s": 8,
     "submit_on_accurate": False,
@@ -451,60 +453,109 @@ def submit_enter(submit_typer: str = "auto") -> tuple[bool, str]:
     return False, f"submit failed; {detail}"
 
 
-def _paste_ydotool() -> tuple[bool, str]:
+def _paste_ydotool(shortcut: str = "auto") -> tuple[bool, str]:
     if not shutil.which("ydotool"):
         return False, "ydotool not found"
 
-    # Try Ctrl+V, then Shift+Insert.
-    combos = [
-        (["29:1", "47:1", "47:0", "29:0"], "ctrl+v"),
-        (["42:1", "110:1", "110:0", "42:0"], "shift+insert"),
-    ]
+    mode = str(shortcut or "auto").strip().lower()
+    if mode == "auto":
+        if os.environ.get("WAYLAND_DISPLAY"):
+            mode = "ctrl-shift-v"
+        else:
+            mode = "ctrl-v"
 
-    errors: list[str] = []
-    for seq, label in combos:
-        ok, msg = _run_cmd(["ydotool", "key", *seq], timeout_s=3.0)
-        if ok:
-            return True, label
-        if msg:
-            errors.append(msg)
+    combos = {
+        "ctrl-shift-v": (["29:1", "42:1", "47:1", "47:0", "42:0", "29:0"], "ctrl+shift+v"),
+        "shift-insert": (["42:1", "110:1", "110:0", "42:0"], "shift+insert"),
+        "ctrl-v": (["29:1", "47:1", "47:0", "29:0"], "ctrl+v"),
+    }
 
-    detail = "; ".join(errors[-2:]) if errors else "ydotool paste failed"
-    return False, detail
+    combo = combos.get(mode)
+    if not combo:
+        return False, f"unsupported paste shortcut: {mode}"
+
+    seq, label = combo
+    ok, msg = _run_cmd(["ydotool", "key", *seq], timeout_s=1.0)
+    if ok:
+        return True, label
+    return False, msg
 
 
-def _paste_xdotool() -> tuple[bool, str]:
+def _paste_xdotool(shortcut: str = "auto") -> tuple[bool, str]:
     if not shutil.which("xdotool"):
         return False, "xdotool not found"
 
-    ok, msg = _run_cmd(["xdotool", "key", "--clearmodifiers", "ctrl+v"], timeout_s=3.0)
+    mode = str(shortcut or "auto").strip().lower()
+    if mode == "auto":
+        if os.environ.get("WAYLAND_DISPLAY"):
+            mode = "ctrl-shift-v"
+        else:
+            mode = "ctrl-v"
+
+    keys = {
+        "ctrl-shift-v": ("ctrl+shift+v", "ctrl+shift+v"),
+        "shift-insert": ("Shift+Insert", "shift+insert"),
+        "ctrl-v": ("ctrl+v", "ctrl+v"),
+    }
+
+    entry = keys.get(mode)
+    if not entry:
+        return False, f"unsupported paste shortcut: {mode}"
+
+    key_seq, label = entry
+    ok, msg = _run_cmd(["xdotool", "key", "--clearmodifiers", key_seq], timeout_s=1.0)
     if ok:
-        return True, "ctrl+v"
+        return True, label
+    return False, msg
 
-    ok2, msg2 = _run_cmd(
-        ["xdotool", "key", "--clearmodifiers", "Shift+Insert"],
-        timeout_s=3.0,
-    )
-    if ok2:
-        return True, "shift+insert"
 
-    return False, msg2 or msg
+def _wayland_clipboard_ready() -> tuple[bool, str]:
+    wd = str(os.environ.get("WAYLAND_DISPLAY", "")).strip()
+    if not wd:
+        return False, "WAYLAND_DISPLAY not set"
+
+    xrd = str(os.environ.get("XDG_RUNTIME_DIR", "")).strip()
+    if not xrd:
+        return False, "XDG_RUNTIME_DIR not set"
+
+    sock = Path(xrd) / wd
+    if not sock.exists():
+        return False, f"Wayland socket missing: {sock}"
+
+    return True, ""
 
 
 def _copy_clipboard(text: str) -> tuple[bool, str]:
+    errors: list[str] = []
+
     if shutil.which("wl-copy"):
-        ok, msg = _run_cmd(["wl-copy"], text_input=text, timeout_s=4.0)
-        if ok:
-            return True, "copied to clipboard with wl-copy"
+        wl_ok, wl_reason = _wayland_clipboard_ready()
+        if not wl_ok:
+            errors.append(f"wl-copy skipped ({wl_reason})")
+        else:
+            ok, msg = _run_cmd(["wl-copy"], text_input=text, timeout_s=0.35)
+            if ok:
+                return True, "copied to clipboard with wl-copy"
+            errors.append(f"wl-copy: {msg or 'failed'}")
+    else:
+        errors.append("wl-copy not found")
+
     if shutil.which("xclip"):
         ok, msg = _run_cmd(
             ["xclip", "-selection", "clipboard"],
             text_input=text,
-            timeout_s=4.0,
+            timeout_s=0.35,
         )
         if ok:
             return True, "copied to clipboard with xclip"
-    return False, "no clipboard tool found (need wl-copy or xclip)"
+        errors.append(f"xclip: {msg or 'failed'}")
+    else:
+        errors.append("xclip not found")
+
+    if not errors:
+        return False, "no clipboard tool found (need wl-copy or xclip)"
+
+    return False, "; ".join(errors[:3])
 
 
 def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 0) -> tuple[bool, str]:
@@ -561,7 +612,11 @@ def type_text(text: str, typer: str = "auto", ydotool_key_delay_ms: int = 0) -> 
     return False, f"typing failed; {detail}"
 
 
-def paste_text(text: str, paste_method: str = "auto") -> tuple[bool, str]:
+def paste_text(
+    text: str,
+    paste_method: str = "auto",
+    paste_shortcut: str = "auto",
+) -> tuple[bool, str]:
     if not text:
         return True, "empty"
 
@@ -570,8 +625,8 @@ def paste_text(text: str, paste_method: str = "auto") -> tuple[bool, str]:
         return False, copy_msg
 
     methods = {
-        "ydotool": _paste_ydotool,
-        "xdotool": _paste_xdotool,
+        "ydotool": lambda: _paste_ydotool(paste_shortcut),
+        "xdotool": lambda: _paste_xdotool(paste_shortcut),
     }
 
     if paste_method == "auto":
@@ -603,6 +658,8 @@ def output_text(
     typer: str = "auto",
     ydotool_key_delay_ms: int = 0,
     paste_method: str = "auto",
+    paste_shortcut: str = "auto",
+    paste_fallback_to_type: bool = True,
     paste_min_chars: int = 24,
 ) -> tuple[bool, str]:
     mode = str(output_mode or "type").strip().lower()
@@ -613,11 +670,19 @@ def output_text(
         return type_text(text, typer, ydotool_key_delay_ms)
 
     if mode == "paste":
-        return paste_text(text, paste_method)
+        ok, msg = paste_text(text, paste_method, paste_shortcut)
+        if ok:
+            return True, msg
+        if bool(paste_fallback_to_type):
+            ok2, msg2 = type_text(text, typer, ydotool_key_delay_ms)
+            if ok2:
+                return True, f"{msg}; fallback {msg2}"
+            return False, f"{msg}; fallback {msg2}"
+        return False, msg
 
     threshold = max(0, int(paste_min_chars or 0))
     if len(text) >= threshold:
-        ok, msg = paste_text(text, paste_method)
+        ok, msg = paste_text(text, paste_method, paste_shortcut)
         if ok:
             return True, msg
 
@@ -1174,6 +1239,8 @@ async def run(cfg: dict) -> None:
                                 cfg.get("typer", "auto"),
                                 int(cfg.get("ydotool_key_delay_ms", 0) or 0),
                                 cfg.get("paste_method", "auto"),
+                                cfg.get("paste_shortcut", "auto"),
+                                bool(cfg.get("paste_fallback_to_type", True)),
                                 int(cfg.get("paste_min_chars", 24) or 0),
                             ),
                             timeout=float(out_timeout),
